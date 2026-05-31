@@ -177,6 +177,30 @@ func (c *EventController) GetCarouselEvents(ctx *gin.Context) {
 	})
 }
 
+func (c *EventController) GetRecommendedEvents(ctx *gin.Context) {
+
+	userID, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized",
+		})
+		return
+	}
+
+	resp, err := c.eventService.GetRecommendedEvents(userID.(uint))
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "success",
+		"data": resp.Events,
+	})
+}
+
 func (c *EventController) JoinEvent(ctx *gin.Context) {
 	uid, exists := ctx.Get("user_id")
 	eventIDParam := ctx.Param("event_id")

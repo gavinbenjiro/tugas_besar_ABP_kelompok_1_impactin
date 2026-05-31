@@ -18,6 +18,9 @@ type EventRepository interface {
    GetYourCreatedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
    GetEventDetailByID(eventID uint) (*response.EventDetailResponseDto, uint, *string, error)
    GetCarouselEvents() (map[string]*response.EventCarouselItemDto, error)
+   GetRecommendationCandidates(userID uint) ([]response.RecommendationCandidate, error)
+   GetFallbackRecommendation() ([]response.EventRecommendationItemDto, error)
+   GetUserCategoryHistory(userID uint) (map[string]int, error)
    GetEventForJoin(eventID uint) (*response.EventJoinCheckDto, error)
    AdminGetAllEvents(status, search string) ([]response.AdminEventsResponseDto, int64, error)
    AdminGetEventDetail(eventID uint) (*response.EventResponseDto, error)
@@ -254,6 +257,88 @@ func (r *eventRepository) GetCarouselEvents() (map[string]*response.EventCarouse
 	}
 
 	return result, nil
+}
+
+func (r *eventRepository) GetRecommendationCandidates(userID uint) ([]response.RecommendationCandidate, error) {
+	var events []response.RecommendationCandidate
+
+	subQuery := r.db.
+		Table("participants").
+		Select("event_id").
+		Where("user_id = ?", userID)
+
+	err := r.db.Table("events").
+		Select(`
+			events.id AS event_id,
+			events.title,
+			events.category,
+			events.cover_image,
+			events.start_date,
+			events.location,
+			profiles.name AS host_name
+		`).
+		Joins("JOIN profiles ON profiles.user_id = events.user_id").
+		Where("events.status = ?", "approved").
+		Where("events.sub_status = ?", "opened").
+		Where("events.id NOT IN (?)", subQuery).
+		Scan(&events).Error
+
+	return events, err
+}
+
+func (r *eventRepository) GetFallbackRecommendation() ([]response.EventRecommendationItemDto, error) {
+	var events []response.EventRecommendationItemDto
+
+	err := r.db.Table("events").
+		Select(`
+			events.id AS event_id,
+			events.title,
+			events.category,
+			events.cover_image,
+			events.start_date,
+			events.location,
+			profiles.name AS host_name
+		`).
+		Joins("JOIN profiles ON profiles.user_id = events.user_id").
+		Where("events.status = ?", "approved").
+		Where("events.sub_status = ?", "opened").
+		Order("events.start_date ASC").
+		Limit(4).
+		Scan(&events).Error
+
+	return events, err
+}
+
+func (r *eventRepository) GetUserCategoryHistory(userID uint) (map[string]int, error) {
+
+	type CategoryCount struct {
+		Category string
+		Total    int
+	}
+
+	var results []CategoryCount
+
+	err := r.db.Table("participants").
+		Select(`
+			events.category,
+			COUNT(*) AS total
+		`).
+		Joins("JOIN events ON events.id = participants.event_id").
+		Where("participants.user_id = ?", userID).
+		Group("events.category").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	history := make(map[string]int)
+
+	for _, r := range results {
+		history[r.Category] = r.Total
+	}
+
+	return history, nil
 }
 
 func (r *eventRepository) GetEventForJoin(eventID uint) (*response.EventJoinCheckDto, error) {

@@ -22,6 +22,7 @@ func EventRoutes(router *gin.Engine, eventController *controllers.EventControlle
 		auth.GET("/your/:event_id", eventController.GetYourCreatedEventDetail)
 		auth.GET("joined", eventController.GetYourJoinedEvents)
 		auth.GET("/:event_id", eventController.GetEventDetail)
+		auth.GET("/recommendation", eventController.GetRecommendedEvents)
 		auth.POST("/join/:event_id", eventController.JoinEvent)
 		auth.PATCH("/applicants/:event_id", eventController.HostApplicantApproval)
 		auth.DELETE("/participants/:event_id", eventController.HostRemoveParticipant)

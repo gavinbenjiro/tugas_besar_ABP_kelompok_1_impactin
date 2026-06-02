@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"sort"
 	"strings"
 	"time"
 
@@ -21,6 +22,7 @@ type EventService interface {
 	GetYourCreatedEventDetail(userID, eventID uint) (*response.YourCreatedEventDetailResponseDto, error)
 	GetEventDetail(eventID uint, userID uint) (*response.EventDetailResponseDto, error)
 	GetCarouselEvents() (*response.EventCarouselResponseDto, error)
+	GetRecommendedEvents(userID uint) (*response.EventRecommendationResponseDto, error)
 	JoinEvent(userID, eventID uint) (response.JoinEventResponseDto, error)
 	AdminGetAllEvents(status, search string) ([]response.AdminEventsResponseDto, int64, error)
 	AdminGetEventDetail(eventID uint) (response.EventResponseDto, error)
@@ -339,6 +341,68 @@ func (s *eventService) GetCarouselEvents() (*response.EventCarouselResponseDto, 
 		Environment: data["environment"],
 		Education:   data["education"],
 		Community:   data["community"],
+	}, nil
+}
+
+func (s *eventService) GetRecommendedEvents(userID uint) (*response.EventRecommendationResponseDto, error) {
+
+	history, err := s.eventRepo.GetUserCategoryHistory(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// User belum pernah ikut event
+	if len(history) == 0 {
+
+		events, err := s.eventRepo.GetFallbackRecommendation()
+		if err != nil {
+			return nil, err
+		}
+
+		return &response.EventRecommendationResponseDto{
+			Events: events,
+		}, nil
+	}
+
+	candidates, err := s.eventRepo.GetRecommendationCandidates(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range candidates {
+		candidates[i].Score = history[candidates[i].Category]
+	}
+
+	sort.Slice(candidates, func(i, j int) bool {
+
+		// score sama → pilih yang tanggalnya lebih dekat
+		if candidates[i].Score == candidates[j].Score {
+			return candidates[i].StartDate.Before(candidates[j].StartDate)
+		}
+
+		return candidates[i].Score > candidates[j].Score
+	})
+
+	if len(candidates) > 4 {
+		candidates = candidates[:4]
+	}
+
+	var result []response.EventRecommendationItemDto
+
+	for _, c := range candidates {
+		result = append(result, response.EventRecommendationItemDto{
+			EventID:    c.EventID,
+			Title:      c.Title,
+			Category:   c.Category,
+			CoverImage: c.CoverImage,
+			StartDate:  c.StartDate.Format("2006-01-02"),
+			Location:   c.Location,
+			HostName:   c.HostName,
+		})
+	}
+
+	return &response.EventRecommendationResponseDto{
+		Events: result,
 	}, nil
 }
 

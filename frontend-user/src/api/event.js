@@ -16,8 +16,13 @@ export const getEventDetailAPI = async (eventId) => {
   return res.data;
 };
 
-export const getEventsCarouselAPI = async () => {
-  const res = await api.get("/user/events/carousel");
+// export const getEventsCarouselAPI = async () => {
+//   const res = await api.get("/user/events/carousel");
+//   return res.data;
+// };
+
+export const getEventsRecommendationAPI = async () => {
+  const res = await api.get("/user/events/recommendation");
   return res.data;
 };
 
@@ -40,4 +45,3 @@ export const joinEventAPI = async (eventId) => {
   const res = await api.post(`/user/events/join/${eventId}`);
   return res.data;
 };
-

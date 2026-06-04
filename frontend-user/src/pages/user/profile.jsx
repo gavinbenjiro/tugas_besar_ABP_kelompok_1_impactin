@@ -4,6 +4,7 @@ import Header from "../../components/navbar.jsx";
 import Footer from "../../components/footer.jsx";
 import MOCK_CARD_IMAGE from "../../assets/hero news.png";
 import avatarImg from "../../assets/photo avatar of user profile.png";
+import { uploadImageToCloudinary } from "../../api/cloudinary";
 import {
   getProfileAPI,
   changePasswordAPI,
@@ -34,6 +35,8 @@ const ProfilePage = () => {
 
   /* ================= ADD EXPERIENCE ================= */
   const [showAddExpModal, setShowAddExpModal] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+
   const [expForm, setExpForm] = useState({
     title: "",
     host_name: "",
@@ -42,40 +45,43 @@ const ProfilePage = () => {
     cover_image: "",
   });
 
+  /* ================= HANDLE SUBMIT ================= */
   const handleAddExperience = async () => {
     if (!expForm.title || !expForm.host_name || !expForm.date) {
-      alert("Title, host, dan date wajib diisi");
+      alert("Title, host name, dan date wajib diisi");
       return;
     }
 
-    // 🔥 FILTER PAYLOAD
-    const payload = {
-      title: expForm.title,
-      host_name: expForm.host_name,
-      date: expForm.date,
-      description: expForm.description,
-    };
-
-    if (expForm.cover_image?.trim()) {
-      payload.cover_image = expForm.cover_image;
-    }
-
     try {
+      const payload = {
+        title: expForm.title.trim(),
+        host_name: expForm.host_name.trim(),
+        date: expForm.date,
+        description: expForm.description?.trim() || "",
+        ...(expForm.cover_image ? { cover_image: expForm.cover_image } : {}),
+      };
+
+      // 🔥 PENTING: ini yang kamu kurang sebelumnya
       const res = await addExperienceAPI(payload);
 
-      setExperienceList((prev) => [
-        {
-          id: res.data.experience_id,
-          title: res.data.title,
-          organizer: res.data.host_name,
-          date: res.data.date,
-          description: res.data.description,
-          cover: res.data.cover_image || MOCK_CARD_IMAGE,
-        },
-        ...prev,
-      ]);
+      console.log("ADD RESPONSE:", res.data);
+
+      // 🔥 FIX: handle kemungkinan backend bentuknya beda
+      const data = res.data?.data || res.data || {};
+
+      const newExperience = {
+        id: data.experience_id || data.id,
+        title: data.title || expForm.title,
+        organizer: data.host_name || expForm.host_name,
+        date: data.date || expForm.date,
+        description: data.description || expForm.description,
+        cover: data.cover_image || expForm.cover_image || MOCK_CARD_IMAGE,
+      };
+
+      setExperienceList((prev) => [newExperience, ...prev]);
 
       setShowAddExpModal(false);
+
       setExpForm({
         title: "",
         host_name: "",
@@ -84,8 +90,8 @@ const ProfilePage = () => {
         cover_image: "",
       });
     } catch (err) {
-      console.error(err.response?.data || err);
-      alert(err.response?.data?.message || "Failed to add experience");
+      console.error(err?.response?.data || err);
+      alert(err?.response?.data?.message || "Failed to add experience");
     }
   };
 
@@ -160,8 +166,8 @@ const ProfilePage = () => {
                 description: payload.description,
                 cover: payload.cover_image || e.cover,
               }
-            : e
-        )
+            : e,
+        ),
       );
 
       setShowEditExpModal(false);
@@ -203,7 +209,7 @@ const ProfilePage = () => {
               date: ev.start_date,
               description: ev.description,
               cover: ev.cover_image || MOCK_CARD_IMAGE,
-            }))
+            })),
           );
         } else {
           setEventList([]);
@@ -219,7 +225,7 @@ const ProfilePage = () => {
               date: e.date,
               description: e.description,
               cover: e.cover_image || MOCK_CARD_IMAGE,
-            }))
+            })),
           );
         } else {
           setExperienceList([]);
@@ -330,7 +336,7 @@ const ProfilePage = () => {
                     >
                       {item}
                     </span>
-                  )
+                  ),
                 )}
               </div>
 
@@ -371,20 +377,37 @@ const ProfilePage = () => {
 
               <hr />
 
+              {/* ================= ACCOUNT SETTINGS ================= */}
               {isOwnProfile && (
-                <div className="flex flex-col gap-3">
+                <div className="mt-4 space-y-3">
+                  <p className="font-bold text-green-800 mb-3">
+                    Account Settings
+                  </p>
+
+                  {/* CHANGE PASSWORD */}
                   <button
                     onClick={() => setShowChangePwModal(true)}
-                    className="text-left px-4 py-2 rounded-lg text-green-700 hover:bg-green-50"
+                    className="w-full text-left px-4 py-3 rounded-lg bg-green-100 border border-green-200 
+                              hover:bg-green-50 transition"
                   >
-                    Change Password
+                    <p className="text-green-700 font-semibold">
+                      Change Password
+                    {/* </p>
+                    <p className="text-xs text-gray-500">
+                      Update your security */}
+                    </p>
                   </button>
 
+                  {/* LOGOUT (FULL RED) */}
                   <button
                     onClick={() => setShowLogoutModal(true)}
-                    className="text-left px-4 py-2 rounded-lg text-red-600 hover:bg-red-50"
+                    className="w-full text-left px-4 py-3 rounded-lg bg-red-600 
+                              text-white font-semibold hover:bg-red-700 transition"
                   >
                     Log Out
+                    {/* <p className="text-xs text-red-100 font-normal">
+                      Sign out from this device
+                    </p> */}
                   </button>
                 </div>
               )}
@@ -528,12 +551,13 @@ const ProfilePage = () => {
         </div>
       </div>
 
+
       <Footer />
 
       {/* ================= ADD EXPERIENCE MODAL ================= */}
       {showAddExpModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md max-h-screen overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Add Experience</h2>
 
             <input
@@ -573,15 +597,44 @@ const ProfilePage = () => {
               className="w-full border p-2 rounded mb-3"
             />
 
-            <input
-              type="text"
-              placeholder="Cover Image URL (optional)"
-              value={expForm.cover_image}
-              onChange={(e) =>
-                setExpForm({ ...expForm, cover_image: e.target.value })
-              }
-              className="w-full border p-2 rounded mb-4"
-            />
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Cover Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  try {
+                    const url = await uploadImageToCloudinary(file);
+                    setExpForm((prev) => ({
+                      ...prev,
+                      cover_image: url,
+                    }));
+                  } catch (err) {
+                    console.error("Upload failed:", err);
+                  }
+                }}
+                className="w-full border p-2 rounded"
+              />
+
+              {/* 🔥 PREVIEW IMAGE SETELAH UPLOAD */}
+              {expForm.cover_image && (
+                <div className="mt-3">
+                  <img
+                    src={expForm.cover_image}
+                    alt="Preview"
+                    className="w-full h-40 rounded object-cover border-2 border-green-500"
+                  />
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ Gambar berhasil diupload
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="flex justify-end gap-3">
               <button
@@ -603,7 +656,7 @@ const ProfilePage = () => {
       {/* ================= EDIT EXPERIENCE MODAL ================= */}
       {showEditExpModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md max-h-screen overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">Edit Experience</h2>
 
             <input
@@ -643,15 +696,44 @@ const ProfilePage = () => {
               className="w-full border p-2 rounded mb-3"
             />
 
-            <input
-              type="text"
-              placeholder="Cover Image URL"
-              value={expForm.cover_image}
-              onChange={(e) =>
-                setExpForm({ ...expForm, cover_image: e.target.value })
-              }
-              className="w-full border p-2 rounded mb-4"
-            />
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">
+                Cover Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+
+                  try {
+                    const url = await uploadImageToCloudinary(file);
+                    setExpForm((prev) => ({
+                      ...prev,
+                      cover_image: url,
+                    }));
+                  } catch (err) {
+                    console.error("Upload failed:", err);
+                  }
+                }}
+                className="w-full border p-2 rounded"
+              />
+
+              {/* 🔥 PREVIEW IMAGE SETELAH UPLOAD */}
+              {expForm.cover_image && (
+                <div className="mt-3">
+                  <img
+                    src={expForm.cover_image}
+                    alt="Preview"
+                    className="w-full h-40 rounded object-cover border-2 border-green-500"
+                  />
+                  <p className="text-xs text-green-600 mt-1">
+                    ✓ Gambar terbaru
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="flex justify-end gap-3">
               <button

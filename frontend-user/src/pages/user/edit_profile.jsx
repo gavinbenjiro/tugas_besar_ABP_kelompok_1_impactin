@@ -200,11 +200,11 @@ const EditProfile = () => {
           {/* FORM */}
           <div className="space-y-5">
             {[
-              ["Username", "username"],
-              ["Nama", "name"],
-              ["Umur", "age"],
-              ["Lokasi", "location"],
-              ["Status", "status"],
+              ["*Username", "username"],
+              ["*Nama", "name"],
+              ["*Umur", "age"],
+              ["*Lokasi", "location"],
+              ["*Status", "status"],
             ].map(([label, key]) => (
               <div key={key}>
                 <label className="font-semibold">{label}</label>
@@ -219,7 +219,7 @@ const EditProfile = () => {
             ))}
 
             <div>
-              <label className="font-semibold">Bio</label>
+              <label className="font-semibold">*Bio</label>
               <textarea
                 value={formData.bio}
                 onChange={(e) =>

@@ -16,10 +16,10 @@ export const getEventDetailAPI = async (eventId) => {
   return res.data;
 };
 
-// export const getEventsCarouselAPI = async () => {
-//   const res = await api.get("/user/events/carousel");
-//   return res.data;
-// };
+export const getEventsCarouselAPI = async () => {
+  const res = await api.get("/user/events/carousel");
+  return res.data;
+};
 
 export const getEventsRecommendationAPI = async () => {
   const res = await api.get("/user/events/recommendation");

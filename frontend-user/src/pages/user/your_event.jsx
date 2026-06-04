@@ -48,14 +48,14 @@ const YourEventPage = () => {
 
       const now = new Date();
 
-      // 🔥 FILTER LOGIC JOINED (FRONTEND)
+      //  FILTER LOGIC JOINED (FRONTEND)
       if (filterValue === "upcoming") {
         mapped = mapped.filter((e) => e.startDate > now);
       }
 
       if (filterValue === "ongoing") {
         mapped = mapped.filter(
-          (e) => e.startDate.toDateString() === now.toDateString()
+          (e) => e.startDate.toDateString() === now.toDateString(),
         );
       }
 
@@ -108,7 +108,7 @@ const YourEventPage = () => {
       // ✅ FRONTEND FILTER MINIMAL (ANTI ERROR DATA)
       if (filterValue === "approved") {
         mapped = mapped.filter(
-          (e) => e.subStatus === "opened" || e.subStatus === "closed"
+          (e) => e.subStatus === "opened" || e.subStatus === "closed",
         );
       }
 
@@ -200,7 +200,7 @@ const YourEventPage = () => {
                   >
                     {i.charAt(0).toUpperCase() + i.slice(1)}
                   </li>
-                )
+                ),
               )}
             </ul>
 
@@ -254,14 +254,19 @@ const YourEventPage = () => {
                 >
                   {/* INFO */}
                   <div>
-                    <h3 className="font-bold text-lg">{event.organizer}</h3>
+                    <h3
+                      className="font-bold text-lg capitalize cursor-pointer hover:text-green-600 transition"
+                      onClick={() => navigate(`/event/${event.id}`)}
+                    >
+                      {event.title}
+                    </h3>
                     <p className="text-gray-600">{event.location}</p>
-                    <p className="text-gray-700 capitalize">{event.title}</p>
+                    <p className="text-gray-700">{event.organizer}</p>
 
                     {menu === "created" && (
                       <span
                         className={`inline-block mt-2 px-3 py-1 text-xs rounded-full ${getBadgeClass(
-                          event
+                          event,
                         )}`}
                       >
                         {getBadgeLabel(event)}

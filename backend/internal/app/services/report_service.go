@@ -63,7 +63,7 @@ func (s *reportService) CreateReportEvent(userID uint, eventID uint, dto request
 		}
 
 	default:
-		return response.ReportEventResponseDto{}, errors.New("event cannot be reported")
+		return response.ReportEventResponseDto{}, errors.New("event already cancelled")
 	}
 
 	// 5️⃣ Simpan report

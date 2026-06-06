@@ -25,57 +25,35 @@ const YourEventPage = () => {
     });
 
   /* ================= DUMMY JOINED EVENTS ================= */
-  const fetchJoinedEvents = async (filterValue) => {
-    try {
-      setLoading(true);
+const fetchJoinedEvents = async (filterValue) => {
+  try {
+    setLoading(true);
 
-      const res = await api.get("/user/events/joined", {
-        params: { status: "all" }, // keyword backend
-      });
+    // backend filter langsung
+    const res = await api.get("/user/events/joined", {
+      params: { status: filterValue },
+    });
 
-      let mapped =
-        res.data?.data?.map((e) => ({
-          id: e.event_id,
-          title: e.title,
-          organizer: e.host_name,
-          location: e.location,
-          date: formatDate(e.start_date),
+    let mapped =
+      res.data?.data?.map((e) => ({
+        id: e.event_id,
+        title: e.title,
+        organizer: e.host_name,
+        location: e.location,
+        date: formatDate(e.start_date),
 
-          startDate: new Date(e.start_date),
-          status: e.status,
-          subStatus: e.sub_status,
-        })) || [];
+        status: e.status,
+        subStatus: e.sub_status,
+      })) || [];
 
-      const now = new Date();
-
-      //  FILTER LOGIC JOINED (FRONTEND)
-      if (filterValue === "upcoming") {
-        mapped = mapped.filter((e) => e.startDate > now);
-      }
-
-      if (filterValue === "ongoing") {
-        mapped = mapped.filter(
-          (e) => e.startDate.toDateString() === now.toDateString(),
-        );
-      }
-
-      if (filterValue === "completed") {
-        mapped = mapped.filter((e) => e.subStatus === "completed");
-      }
-
-      if (filterValue === "cancelled") {
-        mapped = mapped.filter((e) => e.subStatus === "cancelled");
-      }
-
-      // all → no filter
-      setJoinedEvents(mapped);
-    } catch (err) {
-      console.error("Failed to fetch joined events:", err);
-      setJoinedEvents([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+    setJoinedEvents(mapped);
+  } catch (err) {
+    console.error("Failed to fetch joined events:", err);
+    setJoinedEvents([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     if (menu === "joined") {

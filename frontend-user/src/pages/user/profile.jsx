@@ -13,6 +13,14 @@ import {
   editExperienceAPI,
 } from "../../api/profile";
 
+const emptyExperienceForm = {
+  title: "",
+  host_name: "",
+  date: "",
+  description: "",
+  cover_image: "",
+};
+
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -37,13 +45,7 @@ const ProfilePage = () => {
   const [showAddExpModal, setShowAddExpModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const [expForm, setExpForm] = useState({
-    title: "",
-    host_name: "",
-    date: "",
-    description: "",
-    cover_image: "",
-  });
+  const [expForm, setExpForm] = useState(emptyExperienceForm);
 
   /* ================= HANDLE SUBMIT ================= */
   const handleAddExperience = async () => {
@@ -82,13 +84,7 @@ const ProfilePage = () => {
 
       setShowAddExpModal(false);
 
-      setExpForm({
-        title: "",
-        host_name: "",
-        date: "",
-        description: "",
-        cover_image: "",
-      });
+      setExpForm(emptyExperienceForm);
     } catch (err) {
       console.error(err?.response?.data || err);
       alert(err?.response?.data?.message || "Failed to add experience");
@@ -442,7 +438,10 @@ const ProfilePage = () => {
 
                 {isOwnProfile && tab === "experience" && (
                   <button
-                    onClick={() => setShowAddExpModal(true)}
+                    onClick={() => {
+                      setExpForm(emptyExperienceForm);
+                      setShowAddExpModal(true);
+                    }}
                     className="px-4 py-2 bg-green-700 text-white rounded-lg"
                   >
                     + Add Experience
@@ -604,33 +603,48 @@ const ProfilePage = () => {
               <input
                 type="file"
                 accept="image/*"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
+               onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
 
-                  try {
-                    const url = await uploadImageToCloudinary(file);
-                    setExpForm((prev) => ({
-                      ...prev,
-                      cover_image: url,
-                    }));
-                  } catch (err) {
-                    console.error("Upload failed:", err);
-                  }
-                }}
+                try {
+                  setIsUploading(true);
+
+                  const url = await uploadImageToCloudinary(file);
+
+                  setExpForm((prev) => ({
+                    ...prev,
+                    cover_image: url,
+                  }));
+                } catch (err) {
+                  console.error("Upload failed:", err);
+                  alert("Failed to upload image");
+                } finally {
+                  setIsUploading(false);
+                }
+              }}
                 className="w-full border p-2 rounded"
               />
 
-              {/* 🔥 PREVIEW IMAGE SETELAH UPLOAD */}
-              {expForm.cover_image && (
+              {/* 🔥 LOADING */}
+              {isUploading && (
+                <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+                  Uploading image...
+                </div>
+              )}
+
+              {/* 🔥 PREVIEW IMAGE */}
+              {expForm.cover_image && !isUploading && (
                 <div className="mt-3">
                   <img
                     src={expForm.cover_image}
                     alt="Preview"
                     className="w-full h-40 rounded object-cover border-2 border-green-500"
                   />
+
                   <p className="text-xs text-green-600 mt-1">
-                    ✓ Gambar berhasil diupload
+                    ✓ Image uploaded successfully
                   </p>
                 </div>
               )}
@@ -638,16 +652,24 @@ const ProfilePage = () => {
 
             <div className="flex justify-end gap-3">
               <button
-                onClick={() => setShowAddExpModal(false)}
+                onClick={() => {
+                  setExpForm(emptyExperienceForm);
+                  setShowAddExpModal(false);
+                }}
                 className="px-4 py-2 border rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddExperience}
-                className="px-4 py-2 bg-green-700 text-white rounded"
+                disabled={isUploading}
+                className={`px-4 py-2 text-white rounded ${
+                  isUploading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-700"
+                }`}
               >
-                Save
+                {isUploading ? "Uploading..." : "Save"}
               </button>
             </div>
           </div>
@@ -708,28 +730,43 @@ const ProfilePage = () => {
                   if (!file) return;
 
                   try {
+                    setIsUploading(true);
+
                     const url = await uploadImageToCloudinary(file);
+
                     setExpForm((prev) => ({
                       ...prev,
                       cover_image: url,
                     }));
                   } catch (err) {
                     console.error("Upload failed:", err);
+                    alert("Failed to upload image");
+                  } finally {
+                    setIsUploading(false);
                   }
                 }}
                 className="w-full border p-2 rounded"
               />
 
-              {/* 🔥 PREVIEW IMAGE SETELAH UPLOAD */}
-              {expForm.cover_image && (
+              {/* 🔥 LOADING */}
+              {isUploading && (
+                <div className="flex items-center gap-2 mt-3 text-sm text-gray-500">
+                  <div className="w-4 h-4 border-2 border-gray-300 border-t-green-600 rounded-full animate-spin"></div>
+                  Uploading image...
+                </div>
+              )}
+
+              {/* 🔥 PREVIEW IMAGE */}
+              {expForm.cover_image && !isUploading && (
                 <div className="mt-3">
                   <img
                     src={expForm.cover_image}
                     alt="Preview"
                     className="w-full h-40 rounded object-cover border-2 border-green-500"
                   />
+
                   <p className="text-xs text-green-600 mt-1">
-                    ✓ Gambar terbaru
+                    ✓ Image uploaded successfully
                   </p>
                 </div>
               )}
@@ -744,9 +781,14 @@ const ProfilePage = () => {
               </button>
               <button
                 onClick={handleEditExperience}
-                className="px-4 py-2 bg-green-700 text-white rounded"
+                disabled={isUploading}
+                className={`px-4 py-2 text-white rounded ${
+                  isUploading
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-green-700"
+                }`}
               >
-                Update
+                {isUploading ? "Uploading..." : "Update"}
               </button>
             </div>
           </div>

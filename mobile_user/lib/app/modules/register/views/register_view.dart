@@ -102,6 +102,7 @@ class RegisterView extends GetView<RegisterController> {
                           _textField(
                             context,
                             hint: "Email",
+                            controller: controller.emailController,
                           ),
                           SizedBox(
                             height: size.height * 0.02,
@@ -110,6 +111,7 @@ class RegisterView extends GetView<RegisterController> {
                             context,
                             hint: "Username",
                             icon: Icons.person_outline,
+                            controller: controller.usernameController,
                           ),
                           SizedBox(
                             height: size.height * 0.02,
@@ -117,6 +119,7 @@ class RegisterView extends GetView<RegisterController> {
                           _textField(
                             context,
                             hint: "Password",
+                            controller: controller.passwordController,
                             obscure: true,
                           ),
                           SizedBox(
@@ -125,6 +128,7 @@ class RegisterView extends GetView<RegisterController> {
                           _textField(
                             context,
                             hint: "Confirm Password",
+                            controller: controller.confirmPasswordController,
                             obscure: true,
                           ),
                           SizedBox(
@@ -145,9 +149,7 @@ class RegisterView extends GetView<RegisterController> {
                                 ),
                               ),
                               onPressed: () {
-                                Get.offAllNamed(
-                                  Routes.LOGIN,
-                                );
+                                controller.register();
                               },
                               child: Text(
                                 "SIGN IN",
@@ -209,6 +211,7 @@ class RegisterView extends GetView<RegisterController> {
     BuildContext context, {
     required String hint,
     IconData? icon,
+    TextEditingController? controller,
     bool obscure = false,
   }) {
     final size = MediaQuery.of(context).size;
@@ -219,6 +222,7 @@ class RegisterView extends GetView<RegisterController> {
         borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscure,
         style: const TextStyle(
           color: Colors.white,

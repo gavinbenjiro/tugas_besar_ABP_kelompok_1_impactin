@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/internal/app/dtos/request"
 	"backend/internal/app/services"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,9 @@ func NewUserController(us *services.UserService) *UserController {
 }
 
 func (c *UserController) Register(ctx *gin.Context) {
+
+	log.Println("REGISTER ENDPOINT HIT")
+
 	var req request.RegisterRequestDto
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -43,7 +47,7 @@ func (c *UserController) Register(ctx *gin.Context) {
 			})
 			return
 		}
-		
+
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),
 		})
@@ -52,32 +56,32 @@ func (c *UserController) Register(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "registration success",
-		"data": resp,
+		"data":    resp,
 	})
 }
 
 func (c *UserController) Login(ctx *gin.Context) {
-    var req request.LoginRequestDto
+	var req request.LoginRequestDto
 
-    if err := ctx.ShouldBindJSON(&req); err != nil {
-        ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
-        return
-    }
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+		return
+	}
 
-    resp, err := c.UserService.Login(req)
-    if err != nil {
-        if err.Error() == "invalid username or password" {
-            ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-            return
-        }
+	resp, err := c.UserService.Login(req)
+	if err != nil {
+		if err.Error() == "invalid username or password" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+		}
 
-        ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-        return
-    }
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+		return
+	}
 
-    ctx.JSON(http.StatusOK, gin.H{
-        "message": resp.Message,
-        "token":   resp.Token,
-        "data":    resp.Data,
-    })
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": resp.Message,
+		"token":   resp.Token,
+		"data":    resp.Data,
+	})
 }

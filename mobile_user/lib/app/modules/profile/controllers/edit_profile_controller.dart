@@ -40,7 +40,7 @@ class EditProfileController extends GetxController {
       if (userId == null) return;
 
       final response = await dio.get(
-        'http://172.23.240.1:8080/api/user/profile/$userId',
+        'http://192.168.60.242:8080/api/user/profile/$userId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -66,7 +66,9 @@ class EditProfileController extends GetxController {
 
         // Parse Age to DOB
         if (data['age'] != null) {
-          int age = data['age'] is int ? data['age'] : int.tryParse(data['age'].toString()) ?? 0;
+          int age = data['age'] is int
+              ? data['age']
+              : int.tryParse(data['age'].toString()) ?? 0;
           int birthYear = DateTime.now().year - age;
           dobController.text = "01-01-$birthYear";
         }
@@ -99,7 +101,7 @@ class EditProfileController extends GetxController {
 
       // Tambahkan trailing slash (/) untuk mengatasi status 307
       final response = await dio.patch(
-        'http://172.23.240.1:8080/api/user/profile/',
+        'http://192.168.60.242:8080/api/user/profile/',
         data: requestBody,
         options: Options(
           followRedirects: true, // Memaksa ikuti redirect
@@ -110,12 +112,14 @@ class EditProfileController extends GetxController {
         ),
       );
 
-      Get.snackbar('Sukses', 'Profil berhasil diperbarui', backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar('Sukses', 'Profil berhasil diperbarui',
+          backgroundColor: Colors.green, colorText: Colors.white);
       fetchProfileData(); // Refresh data
-
     } on DioException catch (e) {
-      String msg = e.response?.data?['error']?.toString() ?? "Gagal menyimpan profil";
-      Get.snackbar('Gagal', msg, backgroundColor: Colors.red, colorText: Colors.white);
+      String msg =
+          e.response?.data?['error']?.toString() ?? "Gagal menyimpan profil";
+      Get.snackbar('Gagal', msg,
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
@@ -132,9 +136,12 @@ class EditProfileController extends GetxController {
 
   void selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
-        context: context, initialDate: DateTime(2000), firstDate: DateTime(1950), lastDate: DateTime.now()
-    );
-    if (picked != null) dobController.text = "${picked.day}-${picked.month}-${picked.year}";
+        context: context,
+        initialDate: DateTime(2000),
+        firstDate: DateTime(1950),
+        lastDate: DateTime.now());
+    if (picked != null)
+      dobController.text = "${picked.day}-${picked.month}-${picked.year}";
   }
 
   void addSkill() {

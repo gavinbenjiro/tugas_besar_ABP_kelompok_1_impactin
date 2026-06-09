@@ -62,7 +62,7 @@ class ProfileController extends GetxController {
       }
 
       final response = await dio.get(
-        'http://172.23.240.1:8080/api/user/profile/$userId',
+        'http://192.168.60.242:8080/api/user/profile/$userId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -188,8 +188,8 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
 
       final url = id == null
-          ? 'http://172.23.240.1:8080/api/user/profile/experience/'
-          : 'http://172.23.240.1:8080/api/user/profile/experience/$id';
+          ? 'http://192.168.60.242:8080/api/user/profile/experience/'
+          : 'http://192.168.60.242:8080/api/user/profile/experience/$id';
 
       final body = {
         "title": expTitleController.text.trim(),
@@ -261,7 +261,7 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
 
       final response = await dio.delete(
-        'http://172.23.240.1:8080/api/user/profile/experience/$id',
+        'http://192.168.60.242:8080/api/user/profile/experience/$id',
         options: Options(
           headers: {
             "Authorization": "Bearer $token",
@@ -315,7 +315,7 @@ class ProfileController extends GetxController {
 
       // 1. GANTI .post menjadi .patch
       final response = await dio.patch(
-        'http://172.23.240.1:8080/api/user/profile/password',
+        'http://192.168.60.242:8080/api/user/profile/password',
         data: {
           "old_password": oldPassController.text.trim(),
           "new_password": newPassController.text.trim(),

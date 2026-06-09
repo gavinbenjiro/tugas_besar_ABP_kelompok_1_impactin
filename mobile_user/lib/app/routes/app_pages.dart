@@ -22,6 +22,8 @@ import '../modules/tes/bindings/tes_binding.dart';
 import '../modules/tes/views/tes_view.dart';
 import '../modules/your_event/bindings/your_event_binding.dart';
 import '../modules/your_event/views/your_event_view.dart';
+import '../modules/profile/bindings/edit_profile_binding.dart';
+import '../modules/profile/views/edit_profile_view.dart';
 
 part 'app_routes.dart';
 
@@ -38,7 +40,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ONBOARDING,
-      page: () => const OnboardingView(),
+      page: () => OnboardingView(), // <-- TANPA CONST
       binding: OnboardingBinding(),
     ),
     GetPage(
@@ -85,6 +87,11 @@ class AppPages {
       name: _Paths.MANAGE_EVENT,
       page: () => const ManageEventView(),
       binding: ManageEventBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDIT_PROFILE,
+      page: () => const EditProfileView(),
+      binding: EditProfileBinding(),
     ),
   ];
 }

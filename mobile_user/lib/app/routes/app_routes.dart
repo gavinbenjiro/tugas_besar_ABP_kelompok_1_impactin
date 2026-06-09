@@ -14,6 +14,7 @@ abstract class Routes {
   static const TES = _Paths.TES;
   static const CREATE_EVENT = _Paths.CREATE_EVENT;
   static const MANAGE_EVENT = _Paths.MANAGE_EVENT;
+  static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
 }
 
 abstract class _Paths {
@@ -29,4 +30,5 @@ abstract class _Paths {
   static const TES = '/tes';
   static const CREATE_EVENT = '/create-event';
   static const MANAGE_EVENT = '/manage-event';
+  static const EDIT_PROFILE = '/edit-profile';
 }

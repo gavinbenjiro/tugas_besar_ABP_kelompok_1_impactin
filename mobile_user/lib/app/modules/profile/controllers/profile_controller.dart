@@ -245,7 +245,47 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
+  Future<void> deleteExperience(int id) async {
+    try {
+      isLoading.value = true;
 
+      final token = box.read(StorageKeys.token);
+
+      final response = await dio.delete(
+        'http://172.23.240.1:8080/api/user/profile/experience/$id',
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+          },
+        ),
+      );
+
+      print("DELETE STATUS: ${response.statusCode}");
+      print("DELETE BODY: ${response.data}");
+
+      await fetchProfileData();
+
+      Get.snackbar(
+        'Sukses',
+        'Experience berhasil dihapus',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } on DioException catch (e) {
+      print("DELETE STATUS: ${e.response?.statusCode}");
+      print("DELETE BODY: ${e.response?.data}");
+
+      Get.snackbar(
+        'Gagal',
+        'Gagal menghapus experience',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
   @override
   void onClose() {
     expTitleController.dispose();
@@ -253,5 +293,18 @@ class ProfileController extends GetxController {
     expDateController.dispose();
     expDescController.dispose();
     super.onClose();
+  }
+  void showDeleteExperienceDialog(int id) {
+    Get.defaultDialog(
+      title: "Hapus Experience",
+      middleText: "Yakin ingin menghapus experience ini?",
+      textConfirm: "Hapus",
+      textCancel: "Batal",
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        Get.back();
+        deleteExperience(id);
+      },
+    );
   }
 }

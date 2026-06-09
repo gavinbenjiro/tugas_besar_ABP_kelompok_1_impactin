@@ -515,7 +515,9 @@ class ProfileView extends GetView<ProfileController> {
                           padding: EdgeInsets.symmetric(vertical: size.height * 0.016),
                         ),
                         onPressed: () {
-                          // controller.showDeleteExperienceDialog(expId);
+                          controller.showDeleteExperienceDialog(
+                            exp['experience_id'],
+                          );
                         },
                         child: const Text("Delete", style: TextStyle(color: Colors.red)),
                       ),

@@ -130,43 +130,44 @@ class ProfileView extends GetView<ProfileController> {
                             // =========================================
                             // EDIT PROFILE BUTTON
                             // =========================================
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  // Navigasi ke edit & refresh saat kembali
-                                  await Get.toNamed(Routes.EDIT_PROFILE);
-                                  controller.fetchProfileData();
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: size.width * 0.05,
-                                    vertical: size.height * 0.012,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.15),
-                                    borderRadius: BorderRadius.circular(30),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        "Edit profile",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: size.width * 0.036,
-                                        ),
-                                      ),
-                                      SizedBox(width: size.width * 0.03),
-                                      Icon(
-                                        Icons.edit_outlined,
-                                        color: Colors.white,
-                                        size: size.width * 0.05,
-                                      ),
-                                    ],
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // Tombol Change Password
+                                GestureDetector(
+                                  onTap: () => _showChangePasswordDialog(context),
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.04, vertical: size.height * 0.012),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.8), // Warna merah untuk aksi sensitif
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: Text("Change Password", style: TextStyle(color: Colors.white, fontSize: size.width * 0.032)),
                                   ),
                                 ),
-                              ),
+                                SizedBox(width: size.width * 0.03),
+                                // Tombol Edit Profile (yang sudah ada)
+                                GestureDetector(
+                                  onTap: () async {
+                                    await Get.toNamed(Routes.EDIT_PROFILE);
+                                    controller.fetchProfileData();
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.05, vertical: size.height * 0.012),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Text("Edit profile", style: TextStyle(color: Colors.white, fontSize: size.width * 0.036)),
+                                        SizedBox(width: size.width * 0.03),
+                                        Icon(Icons.edit_outlined, color: Colors.white, size: size.width * 0.05),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -595,7 +596,42 @@ class ProfileView extends GetView<ProfileController> {
       fit: BoxFit.cover,
     );
   }
-
+  void _showChangePasswordDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Change Password",
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF114B3A))),
+                const SizedBox(height: 24),
+                _buildDialogTextField(hint: "Current Password", textController: controller.oldPassController),
+                _buildDialogTextField(hint: "New Password", textController: controller.newPassController),
+                _buildDialogTextField(hint: "Confirm New Password", textController: controller.confirmPassController),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF114B3A),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () => controller.updatePassword(),
+                    child: const Text("Save Password", style: TextStyle(color: Colors.white)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
   // =========================================================
   // SHOW EXPERIENCE DIALOG (POP-UP ADD / EDIT)
   // =========================================================

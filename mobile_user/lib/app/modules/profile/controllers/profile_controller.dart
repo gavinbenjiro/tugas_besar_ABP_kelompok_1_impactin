@@ -296,12 +296,75 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 1. Tambahkan controllers untuk password
+  final oldPassController = TextEditingController();
+  final newPassController = TextEditingController();
+  final confirmPassController = TextEditingController();
+
+// 2. Tambahkan method untuk update password
+  Future<void> updatePassword() async {
+    if (newPassController.text != confirmPassController.text) {
+      Get.snackbar('Error', 'Password baru dan konfirmasi tidak sama',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final token = box.read(StorageKeys.token);
+
+      // 1. GANTI .post menjadi .patch
+      final response = await dio.patch(
+        'http://172.23.240.1:8080/api/user/profile/password',
+        data: {
+          "old_password": oldPassController.text.trim(),
+          "new_password": newPassController.text.trim(),
+        },
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+
+      Get.back();
+      Get.snackbar('Sukses', 'Password berhasil diubah',
+          backgroundColor: Colors.green, colorText: Colors.white);
+
+      oldPassController.clear();
+      newPassController.clear();
+      confirmPassController.clear();
+    } on DioException catch (e) {
+      // 2. PERBAIKAN LOGIC ERROR HANDLING
+      String errorMessage = 'Gagal mengubah password';
+
+      // Cek apakah response data adalah Map/JSON
+      if (e.response?.data != null && e.response!.data is Map) {
+        errorMessage = e.response!.data['message'] ?? errorMessage;
+      }
+      // Cek apakah response data adalah String (biasanya saat error 404/500 dari server)
+      else if (e.response?.data is String) {
+        errorMessage = e.response!.data;
+      }
+
+      Get.snackbar('Gagal', errorMessage,
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     expTitleController.dispose();
     expHostController.dispose();
     expDateController.dispose();
     expDescController.dispose();
+    oldPassController.dispose();
+    newPassController.dispose();
+    confirmPassController.dispose();
     super.onClose();
   }
 

@@ -71,7 +71,7 @@ class CustomBottomNavbar extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         if (!isActive) {
-          Get.offNamed(route);
+          Get.toNamed(route);
         }
       },
       child: Icon(

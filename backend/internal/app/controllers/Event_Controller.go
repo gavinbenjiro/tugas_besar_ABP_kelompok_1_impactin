@@ -11,48 +11,48 @@ import (
 )
 
 type EventController struct {
-   eventService services.EventService
-   profileService services.ProfileService
+	eventService   services.EventService
+	profileService services.ProfileService
 }
 
 func NewEventController(eventService services.EventService, profileService services.ProfileService) *EventController {
-   return &EventController{eventService, profileService}
+	return &EventController{eventService, profileService}
 }
 
 func (c *EventController) CreateEvent(ctx *gin.Context) {
-   uid, exists := ctx.Get("user_id")
-   if !exists {
-       ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-       return
-   }
+	uid, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
-   userID := uid.(uint)
+	userID := uid.(uint)
 
-   // Ambil profile berdasarkan user_id
-   profile, err := c.profileService.GetByUserID(userID)
-   if err != nil {
-       ctx.JSON(http.StatusBadRequest, gin.H{"error": "profile not found"})
-       return
-   }
+	// Ambil profile berdasarkan user_id
+	profile, err := c.profileService.GetByUserID(userID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "profile not found"})
+		return
+	}
 
-   var req request.EventRequestDto
-   if err := ctx.ShouldBindJSON(&req); err != nil {
-       ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-       return
-   }
+	var req request.EventRequestDto
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-   resp, err := c.eventService.CreateEvent(profile.UserID, req)
-   if err != nil {
-       ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-       return
-   }
+	resp, err := c.eventService.CreateEvent(profile.UserID, req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-   ctx.JSON(http.StatusCreated, resp)
+	ctx.JSON(http.StatusCreated, resp)
 }
 
 func (c *EventController) GetAllEvents(ctx *gin.Context) {
-    category := ctx.Query("category")
-    search := ctx.Query("search")
+	category := ctx.Query("category")
+	search := ctx.Query("search")
 	ageRanges := ctx.QueryArray("age")
 
 	resp, err := c.eventService.GetAllEvents(category, search, ageRanges)
@@ -70,13 +70,14 @@ func (c *EventController) GetAllEvents(ctx *gin.Context) {
 }
 
 func (c *EventController) GetYourCreatedEvents(ctx *gin.Context) {
-	uid, exists := ctx.Get("user_id")
-	status := ctx.Query("status")
 
-    if !exists {
-        ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-        return
-    }
+	uid, exists := ctx.Get("user_id")
+	status := ctx.DefaultQuery("status", "all")
+
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	if status == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -85,7 +86,7 @@ func (c *EventController) GetYourCreatedEvents(ctx *gin.Context) {
 		return
 	}
 
-    userID := uid.(uint)
+	userID := uid.(uint)
 
 	profile, err := c.profileService.GetByUserID(userID)
 	if err != nil {
@@ -99,7 +100,7 @@ func (c *EventController) GetYourCreatedEvents(ctx *gin.Context) {
 		return
 	}
 
-    ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"message": "events retrieved",
 		"data":    events,
 	})
@@ -110,9 +111,9 @@ func (c *EventController) GetYourCreatedEventDetail(ctx *gin.Context) {
 	eventIDParam := ctx.Param("event_id")
 
 	if !exists {
-        ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-        return
-    }
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	eventID, err := strconv.Atoi(eventIDParam)
 	if err != nil {
@@ -132,13 +133,13 @@ func (c *EventController) GetYourCreatedEventDetail(ctx *gin.Context) {
 }
 
 func (c *EventController) GetEventDetail(ctx *gin.Context) {
-    uid, exists := ctx.Get("user_id")
+	uid, exists := ctx.Get("user_id")
 	eventIDParam := ctx.Param("event_id")
 
-    if !exists {
-        ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-        return
-    }
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	eventID, err := strconv.Atoi(eventIDParam)
 	if err != nil {
@@ -146,12 +147,12 @@ func (c *EventController) GetEventDetail(ctx *gin.Context) {
 		return
 	}
 
-    userID := uid.(uint)
+	userID := uid.(uint)
 
-    profile, err := c.profileService.GetByUserID(userID)
-    if err == nil {
-        userID = profile.UserID
-    }
+	profile, err := c.profileService.GetByUserID(userID)
+	if err == nil {
+		userID = profile.UserID
+	}
 
 	event, err := c.eventService.GetEventDetail(uint(eventID), userID)
 	if err != nil {
@@ -197,7 +198,7 @@ func (c *EventController) GetRecommendedEvents(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
-		"data": resp.Events,
+		"data":    resp.Events,
 	})
 }
 
@@ -206,9 +207,9 @@ func (c *EventController) JoinEvent(ctx *gin.Context) {
 	eventIDParam := ctx.Param("event_id")
 
 	if !exists {
-        ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
-        return
-    }
+		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 
 	eventID, err := strconv.Atoi(eventIDParam)
 	if err != nil {
@@ -382,7 +383,7 @@ func (c *EventController) CancelEvent(ctx *gin.Context) {
 		a := aid.(uint)
 		adminID = &a
 	}
-	
+
 	resp, err := c.eventService.CancelEvent(uint(eventID), userID, adminID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

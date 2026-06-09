@@ -1,7 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
+import '../../../core/storage/storage_keys.dart';
+import 'package:get_storage/get_storage.dart';
+
+import '../../../core/api/profile_api.dart';
 import '../../../core/storage/storage_keys.dart';
 
 class ProfileController extends GetxController {
@@ -36,6 +41,7 @@ class ProfileController extends GetxController {
 
   @override
   void onInit() {
+    print("ON INIT CALLED");
     super.onInit();
     fetchProfileData();
   }
@@ -56,7 +62,7 @@ class ProfileController extends GetxController {
       }
 
       final response = await dio.get(
-        'http://172.23.240.1:8080/api/user/profile/$userId',
+        'http://192.168.60.242:8080/api/user/profile/$userId',
         options: Options(
           headers: {
             'Accept': 'application/json',
@@ -126,7 +132,8 @@ class ProfileController extends GetxController {
       expTitleController.text = exp['title']?.toString() ?? "";
 
       // Mapping 'creator' dari GET ke 'host_name' untuk PATCH
-      expHostController.text = exp['creator']?.toString() ?? exp['host_name']?.toString() ?? "";
+      expHostController.text =
+          exp['creator']?.toString() ?? exp['host_name']?.toString() ?? "";
 
       // Handle Date Format (ambil YYYY-MM-DD saja)
       String date = exp['date']?.toString() ?? "";
@@ -134,7 +141,8 @@ class ProfileController extends GetxController {
       expDateController.text = date;
 
       expDescController.text = exp['description']?.toString() ?? "";
-      expImageUrl.value = exp['cover_image']?.toString() ?? "https://example.com/gamagudabo.jpg";
+      expImageUrl.value = exp['cover_image']?.toString() ??
+          "https://example.com/gamagudabo.jpg";
     } else {
       // Setup untuk Add Experience baru
       expTitleController.clear();
@@ -165,7 +173,8 @@ class ProfileController extends GetxController {
     );
     if (picked != null) {
       // Format ke YYYY-MM-DD
-      expDateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      expDateController.text =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -179,8 +188,8 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
 
       final url = id == null
-          ? 'http://172.23.240.1:8080/api/user/profile/experience/'
-          : 'http://172.23.240.1:8080/api/user/profile/experience/$id';
+          ? 'http://192.168.60.242:8080/api/user/profile/experience/'
+          : 'http://192.168.60.242:8080/api/user/profile/experience/$id';
 
       final body = {
         "title": expTitleController.text.trim(),
@@ -195,27 +204,27 @@ class ProfileController extends GetxController {
 
       final response = id == null
           ? await dio.post(
-        url,
-        data: body,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        ),
-      )
+              url,
+              data: body,
+              options: Options(
+                headers: {
+                  "Authorization": "Bearer $token",
+                  "Accept": "application/json",
+                  "Content-Type": "application/json",
+                },
+              ),
+            )
           : await dio.patch(
-        url,
-        data: body,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        ),
-      );
+              url,
+              data: body,
+              options: Options(
+                headers: {
+                  "Authorization": "Bearer $token",
+                  "Accept": "application/json",
+                  "Content-Type": "application/json",
+                },
+              ),
+            );
 
       print("SUCCESS STATUS: ${response.statusCode}");
       print("SUCCESS BODY: ${response.data}");
@@ -229,7 +238,6 @@ class ProfileController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-
     } on DioException catch (e) {
       print("ERROR STATUS: ${e.response?.statusCode}");
       print("ERROR DATA: ${e.response?.data}");
@@ -245,6 +253,7 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
+
   Future<void> deleteExperience(int id) async {
     try {
       isLoading.value = true;
@@ -252,7 +261,7 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
 
       final response = await dio.delete(
-        'http://172.23.240.1:8080/api/user/profile/experience/$id',
+        'http://192.168.60.242:8080/api/user/profile/experience/$id',
         options: Options(
           headers: {
             "Authorization": "Bearer $token",
@@ -286,6 +295,7 @@ class ProfileController extends GetxController {
       isLoading.value = false;
     }
   }
+
   // 1. Tambahkan controllers untuk password
   final oldPassController = TextEditingController();
   final newPassController = TextEditingController();
@@ -305,7 +315,7 @@ class ProfileController extends GetxController {
 
       // 1. GANTI .post menjadi .patch
       final response = await dio.patch(
-        'http://172.23.240.1:8080/api/user/profile/password',
+        'http://192.168.60.242:8080/api/user/profile/password',
         data: {
           "old_password": oldPassController.text.trim(),
           "new_password": newPassController.text.trim(),
@@ -326,7 +336,6 @@ class ProfileController extends GetxController {
       oldPassController.clear();
       newPassController.clear();
       confirmPassController.clear();
-
     } on DioException catch (e) {
       // 2. PERBAIKAN LOGIC ERROR HANDLING
       String errorMessage = 'Gagal mengubah password';
@@ -358,6 +367,7 @@ class ProfileController extends GetxController {
     confirmPassController.dispose();
     super.onClose();
   }
+
   void showDeleteExperienceDialog(int id) {
     Get.defaultDialog(
       title: "Hapus Experience",

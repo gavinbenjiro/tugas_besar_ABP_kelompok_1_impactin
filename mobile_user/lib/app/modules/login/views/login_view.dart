@@ -118,6 +118,7 @@ class LoginView extends GetView<LoginController> {
                           // USERNAME
                           // =====================================
                           _textField(
+                            controller: controller.usernameController,
                             context,
                             hint: "Username",
                             icon: Icons.person_outline,
@@ -133,6 +134,7 @@ class LoginView extends GetView<LoginController> {
                           _textField(
                             context,
                             hint: "Password",
+                            controller: controller.passwordController,
                             icon: Icons.lock_outline,
                             obscure: true,
                           ),
@@ -158,11 +160,7 @@ class LoginView extends GetView<LoginController> {
                                   ),
                                 ),
                               ),
-                              onPressed: () {
-                                Get.offAllNamed(
-                                  Routes.HOME,
-                                );
-                              },
+                              onPressed: controller.login,
                               child: Text(
                                 "LOG IN",
                                 style: TextStyle(
@@ -229,6 +227,7 @@ class LoginView extends GetView<LoginController> {
     required String hint,
     required IconData icon,
     bool obscure = false,
+    TextEditingController? controller,
   }) {
     final size = MediaQuery.of(context).size;
 
@@ -238,6 +237,7 @@ class LoginView extends GetView<LoginController> {
         borderRadius: BorderRadius.circular(14),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscure,
         style: const TextStyle(
           color: Colors.white,

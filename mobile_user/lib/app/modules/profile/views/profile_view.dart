@@ -2,7 +2,8 @@
 // PROFILE VIEW
 // SLICING STYLE RESPONSIVE UI
 // =========================================================
-
+import 'package:get_storage/get_storage.dart';
+import '../../../core/storage/storage_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -337,7 +338,16 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                     onPressed: () {
-                      Get.offAllNamed(Routes.LOGIN);
+                      final box = GetStorage();
+
+                      box.remove(StorageKeys.token);
+                      box.remove(StorageKeys.userId);
+                      box.remove(StorageKeys.username);
+                      box.remove(StorageKeys.email);
+
+                      Get.offAllNamed(
+                        Routes.LOGIN,
+                      );
                     },
                     icon: Icon(
                       Icons.logout,

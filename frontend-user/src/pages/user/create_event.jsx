@@ -38,6 +38,7 @@ export default function CreateEvent() {
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -87,6 +88,7 @@ export default function CreateEvent() {
     // ==================================================
 
     try {
+      setIsSubmitting(true);
       let imageUrl = "https://example.com/default.jpg";
 
       if (formData.coverImage) {
@@ -119,6 +121,8 @@ export default function CreateEvent() {
     } catch (err) {
       console.error(err);
       alert("Failed to create event");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -392,9 +396,14 @@ export default function CreateEvent() {
             {/* SUBMIT BUTTON */}
             <button
               type="submit"
-              className="w-full py-3 bg-green-800 text-white rounded-lg hover:bg-green-900"
+              disabled={isSubmitting}
+              className={`w-full py-3 text-white rounded-lg transition ${
+                isSubmitting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-green-800 hover:bg-green-900"
+              }`}
             >
-              DONE
+              {isSubmitting ? "Creating Event..." : "DONE"}
             </button>
           </form>
         </div>

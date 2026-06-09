@@ -14,6 +14,8 @@ import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
 import '../modules/search_event/bindings/search_event_binding.dart';
 import '../modules/search_event/views/search_event_view.dart';
+import '../modules/tes/bindings/tes_binding.dart';
+import '../modules/tes/views/tes_view.dart';
 import '../modules/your_event/bindings/your_event_binding.dart';
 import '../modules/your_event/views/your_event_view.dart';
 
@@ -64,6 +66,11 @@ class AppPages {
       name: _Paths.REGISTER,
       page: () => const RegisterView(),
       binding: RegisterBinding(),
+    ),
+    GetPage(
+      name: _Paths.TES,
+      page: () => const TesView(),
+      binding: TesBinding(),
     ),
   ];
 }

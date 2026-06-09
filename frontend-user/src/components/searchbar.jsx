@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 const SearchBar = () => {
   const [search, setSearch] = useState("");
+
   const navigate = useNavigate();
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && search.trim() !== "") {
-      navigate(`/search?query=${encodeURIComponent(search)}`);
+      navigate(`/search?q=${encodeURIComponent(search)}`);
     }
   };
 

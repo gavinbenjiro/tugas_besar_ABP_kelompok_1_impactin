@@ -20,6 +20,9 @@ const EventDetailPage = () => {
 
   const [joined, setJoined] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const isClosed =
+  event?.status === "closed" ||
+  event?.subStatus === "closed";
 
   // 🔴 REPORT STATE
   const [showReport, setShowReport] = useState(false);
@@ -260,13 +263,18 @@ const EventDetailPage = () => {
         </div>
 
         {/* JOIN */}
-        <div className="p-8 flex justify-end">
+        <div className="p-8 flex flex-col items-end gap-3">
+          {isClosed && (
+            <div className="text-sm text-red-600 font-medium">
+              This event is currently unavailable.
+            </div>
+          )}
           <button
             onClick={!joined ? handleJoinEvent : undefined}
-            disabled={joined}
+            disabled={joined || isClosed}
             className={`px-10 py-3 rounded-lg font-bold transition
               ${
-                joined
+                joined || isClosed
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-700 text-white hover:bg-green-800"
               }`}
@@ -277,6 +285,8 @@ const EventDetailPage = () => {
               ? "JOINED"
               : event.isApplicant
               ? "WAITING FOR APPROVAL"
+              : isClosed
+              ? "EVENT CLOSED"
               : "JOIN EVENT"}
           </button>
         </div>

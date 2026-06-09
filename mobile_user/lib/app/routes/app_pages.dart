@@ -34,7 +34,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.ONBOARDING,
-      page: () => const OnboardingView(),
+      page: () => OnboardingView(), // <-- TANPA CONST
       binding: OnboardingBinding(),
     ),
     GetPage(

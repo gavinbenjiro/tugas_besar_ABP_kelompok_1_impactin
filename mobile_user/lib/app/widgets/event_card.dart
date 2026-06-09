@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../routes/app_pages.dart';
-import '../data/models/event_model.dart';
 
 class EventCard extends StatelessWidget {
-  final EventModel event;
+  final Map<String, dynamic> event;
 
   const EventCard({
     super.key,
@@ -18,7 +17,7 @@ class EventCard extends StatelessWidget {
       onTap: () {
         Get.toNamed(
           Routes.EVENT_DETAIL,
-          arguments: event.id,
+          arguments: event["event_id"],
         );
       },
       child: Container(
@@ -37,11 +36,21 @@ class EventCard extends StatelessWidget {
             // IMAGE
             ClipRRect(
               borderRadius: BorderRadius.circular(14),
-              child: Image.asset(
-                event.coverImage,
+              child: Image.network(
+                event["cover_image"] ?? "",
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) {
+                  return Container(
+                    width: 100,
+                    height: 100,
+                    color: Colors.grey.shade300,
+                    child: const Icon(
+                      Icons.image,
+                    ),
+                  );
+                },
               ),
             ),
 
@@ -54,7 +63,7 @@ class EventCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    event.title,
+                    event["title"] ?? "-",
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -74,7 +83,7 @@ class EventCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          event.location,
+                          event["location"] ?? "-",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -96,7 +105,7 @@ class EventCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          event.startDate,
+                          event["start_date"] ?? "-",
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             color: Colors.grey.shade600,

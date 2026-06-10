@@ -4,6 +4,7 @@ import 'api_client.dart';
 import 'api_endpoints.dart';
 import '../../data/models/event_model.dart';
 import '../../data/models/manage_event_model.dart';
+import '../../data/models/search_event_model.dart';
 
 class EventApi {
   static Future<Response> getAllEvents() {
@@ -139,6 +140,73 @@ class EventApi {
       ApiEndpoints.removeParticipant(participantId),
       data: {
         "user_id": userId,
+      },
+    );
+  }
+
+  static Future<List<SearchEventModel>> searchEvents({
+    String? category,
+    String? search,
+    List<String>? ages,
+  }) async {
+    try {
+      final query = <String, dynamic>{};
+
+      if (category != null && category.isNotEmpty && category != 'All') {
+        query['category'] = category;
+      }
+
+      if (search != null && search.isNotEmpty) {
+        query['search'] = search;
+      }
+
+      if (ages != null && ages.isNotEmpty) {
+        query['age'] = ages;
+      }
+
+      final response = await ApiClient.dio.get(
+        ApiEndpoints.getAllEvents,
+        queryParameters: query,
+      );
+
+      print(response.data);
+
+      final data = response.data['data'];
+
+      if (data == null) {
+        return [];
+      }
+
+      return (data as List)
+          .map(
+            (e) => SearchEventModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data?['message'] ?? 'Failed to load events',
+      );
+    }
+  }
+
+  static Future<Response> joinEvent(
+    int eventId,
+  ) {
+    return ApiClient.dio.post(
+      ApiEndpoints.joinEvent(eventId),
+    );
+  }
+
+  static Future<Response> reportEvent({
+    required int eventId,
+    required String description,
+  }) {
+    return ApiClient.dio.post(
+      ApiEndpoints.reportEvent(eventId),
+      data: {
+        "description": description,
       },
     );
   }

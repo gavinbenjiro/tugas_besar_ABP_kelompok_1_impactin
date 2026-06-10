@@ -48,11 +48,11 @@ class AppPages {
       page: () => const EventDetailView(),
       binding: EventDetailBinding(),
     ),
-    // GetPage(
-    //   name: _Paths.SEARCH_EVENT,
-    //   page: () => const SearchEventView(),
-    //   binding: SearchEventBinding(),
-    // ),
+    GetPage(
+      name: _Paths.SEARCH_EVENT,
+      page: () => const SearchEventView(),
+      binding: SearchEventBinding(),
+    ),
     GetPage(
       name: _Paths.YOUR_EVENT,
       page: () => const YourEventView(),

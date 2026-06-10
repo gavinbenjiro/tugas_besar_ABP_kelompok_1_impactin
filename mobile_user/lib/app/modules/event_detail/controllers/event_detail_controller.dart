@@ -9,6 +9,21 @@ class EventDetailController extends GetxController {
   final errorMessage = ''.obs;
   final event = Rxn<EventModel>();
 
+  bool get isHost => event.value?.isHost ?? false;
+  bool get isApplicant => event.value?.isApplicant ?? false;
+  bool get isParticipant => event.value?.isParticipant ?? false;
+
+  bool get canJoin => !isHost && !isApplicant && !isParticipant;
+
+  String get joinStatusText {
+    if (isHost) return 'You are the host';
+    if (isApplicant) return 'Waiting for approval';
+    if (isParticipant) return 'You already joined';
+    return 'Join Event';
+  }
+
+  bool get showGroupLink => isParticipant;
+
   @override
   void onInit() {
     super.onInit();
@@ -35,5 +50,54 @@ class EventDetailController extends GetxController {
 
   void changeTab(int index) {
     selectedTab.value = index;
+  }
+
+  Future<void> joinEvent() async {
+    try {
+      final currentEvent = event.value;
+
+      if (currentEvent == null) return;
+
+      final eventId = int.parse(currentEvent.id);
+
+      await EventApi.joinEvent(eventId);
+
+      Get.snackbar(
+        'Success',
+        'Application submitted successfully',
+      );
+
+      await fetchEventDetail(eventId);
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+      );
+    }
+  }
+
+  Future<void> reportEvent(String description) async {
+    try {
+      final currentEvent = event.value;
+
+      if (currentEvent == null) return;
+
+      await EventApi.reportEvent(
+        eventId: int.parse(currentEvent.id),
+        description: description,
+      );
+
+      Get.back();
+
+      Get.snackbar(
+        'Success',
+        'Report submitted successfully',
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+      );
+    }
   }
 }

@@ -31,4 +31,12 @@ class ApiEndpoints {
       "/user/events/applicants/$userId";
   static String removeParticipant(int userId) =>
       "/user/events/participants/$userId";
+
+  static const profile = '/user/profile';
+  static const experience = '/user/profile/experience';
+
+  static const updatePassword = '/user/profile/password';
+
+  static String joinEvent(int eventId) => "/user/events/join/$eventId";
+  static String reportEvent(int eventId) => "/user/events/report/$eventId";
 }

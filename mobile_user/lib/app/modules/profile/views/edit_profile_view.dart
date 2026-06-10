@@ -71,6 +71,9 @@ class EditProfileView extends GetView<EditProfileController> {
             const SizedBox(height: 32),
 
             // --- FORM FIELDS ---
+            _buildLabel('Username'),
+            _buildTextField(controller: controller.usernameController),
+
             _buildLabel('Full Name'),
             _buildTextField(controller: controller.nameController),
 

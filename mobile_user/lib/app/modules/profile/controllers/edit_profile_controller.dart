@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/storage/storage_keys.dart';
+import '../../../core/api/profile_api.dart'; // Import Profile API
+import '../controllers/profile_controller.dart'; // Import ProfileController untuk refresh data setelah update
 
 class EditProfileController extends GetxController {
   // Text Controllers
@@ -12,10 +14,10 @@ class EditProfileController extends GetxController {
   final locationController = TextEditingController();
   final bioController = TextEditingController();
   final skillController = TextEditingController();
+  final usernameController = TextEditingController();
 
-  // Storage & Dio
+  // Storage
   final box = GetStorage();
-  final dio = Dio();
 
   // Reactive State
   var skills = <String>[].obs;
@@ -29,7 +31,7 @@ class EditProfileController extends GetxController {
   }
 
   // ==========================================
-  // API: GET PROFILE (LOAD DATA ASLI)
+  // GET PROFILE (LOAD DATA ASLI)
   // ==========================================
   Future<void> fetchProfileData() async {
     try {
@@ -37,20 +39,17 @@ class EditProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
       final userId = box.read(StorageKeys.userId);
 
-      if (userId == null) return;
+      if (userId == null || token == null) return;
 
-      final response = await dio.get(
-        'http://172.23.240.1:8080/api/user/profile/$userId',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ),
+      // Panggil dari ProfileApi
+      final response = await ProfileApi.getProfile(
+        userId: userId.toString(),
+        token: token,
       );
 
       final data = response.data;
       if (data is Map) {
+        usernameController.text = data['username']?.toString() ?? "";
         nameController.text = data['name']?.toString() ?? "";
         statusController.text = data['status']?.toString() ?? "";
         locationController.text = data['city']?.toString() ?? "";
@@ -79,15 +78,20 @@ class EditProfileController extends GetxController {
   }
 
   // ==========================================
-  // API: PATCH PROFILE (SAVE DATA)
+  // PATCH PROFILE (SAVE DATA)
   // ==========================================
   Future<void> saveProfile() async {
     try {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
 
+      if (token == null) {
+        Get.snackbar('Error', 'Sesi tidak valid', backgroundColor: Colors.red, colorText: Colors.white);
+        return;
+      }
+
       final requestBody = {
-        "username": box.read(StorageKeys.username) ?? "gavinbenjiro",
+        "username": usernameController.text.trim(),
         "name": nameController.text.trim(),
         "status": statusController.text.trim(),
         "age": _calculateAge(dobController.text.trim()),
@@ -97,21 +101,30 @@ class EditProfileController extends GetxController {
         "skills": skills.toList(),
       };
 
-      // Tambahkan trailing slash (/) untuk mengatasi status 307
-      final response = await dio.patch(
-        'http://172.23.240.1:8080/api/user/profile/',
+      // 1. Panggil API Update Profile
+      await ProfileApi.updateProfile(
         data: requestBody,
-        options: Options(
-          followRedirects: true, // Memaksa ikuti redirect
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ),
+        token: token,
       );
 
-      Get.snackbar('Sukses', 'Profil berhasil diperbarui', backgroundColor: Colors.green, colorText: Colors.white);
-      fetchProfileData(); // Refresh data
+      // 2. Refresh data di ProfileController utama (halaman sebelumnya)
+      if (Get.isRegistered<ProfileController>()) {
+        Get.find<ProfileController>().fetchProfileData();
+      }
+
+      // 3. KEMBALI DULU KE PROFILE PAGE (Tutup halaman Edit)
+      // closeOverlays: true memastikan jika ada dialog/snackbar yang nyangkut ikut tertutup
+      Get.back(closeOverlays: true); 
+
+      // 4. BARU TAMPILKAN SNACKBAR SAKSES
+      // Snackbar ini sekarang akan muncul dengan rapi di atas halaman Profile Page
+      Get.snackbar(
+        'Sukses', 
+        'Profil berhasil diperbarui', 
+        backgroundColor: Colors.green, 
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM, // Opsional: biar rapi di bawah
+      );
 
     } on DioException catch (e) {
       String msg = e.response?.data?['error']?.toString() ?? "Gagal menyimpan profil";
@@ -121,7 +134,9 @@ class EditProfileController extends GetxController {
     }
   }
 
+  // ==========================================
   // HELPER FUNCTIONS
+  // ==========================================
   int _calculateAge(String dobStr) {
     try {
       final parts = dobStr.split('-');
@@ -132,7 +147,10 @@ class EditProfileController extends GetxController {
 
   void selectDate(BuildContext context) async {
     DateTime? picked = await showDatePicker(
-        context: context, initialDate: DateTime(2000), firstDate: DateTime(1950), lastDate: DateTime.now()
+        context: context,
+        initialDate: DateTime(2000),
+        firstDate: DateTime(1950),
+        lastDate: DateTime.now()
     );
     if (picked != null) dobController.text = "${picked.day}-${picked.month}-${picked.year}";
   }
@@ -148,6 +166,7 @@ class EditProfileController extends GetxController {
 
   @override
   void onClose() {
+    usernameController.dispose();
     nameController.dispose();
     dobController.dispose();
     statusController.dispose();

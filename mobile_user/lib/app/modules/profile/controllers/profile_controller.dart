@@ -3,10 +3,10 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_keys.dart';
+import '../../../core/api/profile_api.dart'; // Import Profile API
 
 class ProfileController extends GetxController {
   final box = GetStorage();
-  final dio = Dio();
 
   // ==========================================
   // REACTIVE STATE (PROFILE DATA)
@@ -20,7 +20,6 @@ class ProfileController extends GetxController {
   var bio = ''.obs;
   var imageUrl = ''.obs;
 
-  // Lists for dynamic sections
   var skills = <dynamic>[].obs;
   var experiences = <dynamic>[].obs;
   var events = <dynamic>[].obs;
@@ -33,6 +32,11 @@ class ProfileController extends GetxController {
   final expDateController = TextEditingController();
   final expDescController = TextEditingController();
   var expImageUrl = "https://example.com/gamagudabo.jpg".obs;
+
+  // Password Controllers
+  final oldPassController = TextEditingController();
+  final newPassController = TextEditingController();
+  final confirmPassController = TextEditingController();
 
   @override
   void onInit() {
@@ -49,20 +53,16 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
       final userId = box.read(StorageKeys.userId);
 
-      if (userId == null) {
-        Get.snackbar('Error', 'User ID tidak ditemukan. Silakan login kembali.',
+      if (userId == null || token == null) {
+        Get.snackbar('Error', 'Sesi tidak valid. Silakan login kembali.',
             backgroundColor: Colors.orange, colorText: Colors.white);
         return;
       }
 
-      final response = await dio.get(
-        'http://172.23.240.1:8080/api/user/profile/$userId',
-        options: Options(
-          headers: {
-            'Accept': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ),
+      // Gunakan ProfileApi
+      final response = await ProfileApi.getProfile(
+        userId: userId.toString(),
+        token: token,
       );
 
       final data = response.data;
@@ -73,7 +73,6 @@ class ProfileController extends GetxController {
         city.value = data['city']?.toString() ?? "";
         bio.value = data['bio']?.toString() ?? "";
 
-        // Parse Age safely
         if (data['age'] != null) {
           age.value = data['age'] is int
               ? data['age']
@@ -84,30 +83,12 @@ class ProfileController extends GetxController {
           imageUrl.value = data['image_url'].toString();
         }
 
-        // Parse Skills
-        if (data['skills'] != null && data['skills'] is List) {
-          skills.value = data['skills'];
-        } else {
-          skills.clear();
-        }
-
-        // Parse Experiences
-        if (data['experiences'] != null && data['experiences'] is List) {
-          experiences.value = data['experiences'];
-        } else {
-          experiences.clear();
-        }
-
-        // Parse Events
-        if (data['events'] != null && data['events'] is List) {
-          events.value = data['events'];
-        } else {
-          events.clear();
-        }
+        skills.value = (data['skills'] is List) ? data['skills'] : [];
+        experiences.value = (data['experiences'] is List) ? data['experiences'] : [];
+        events.value = (data['events'] is List) ? data['events'] : [];
       }
     } on DioException catch (e) {
       print("GET PROFILE ERROR STATUS: ${e.response?.statusCode}");
-      print("GET PROFILE ERROR BODY: ${e.response?.data}");
       Get.snackbar('Gagal Memuat Profil', 'Gagal menarik data dari server',
           backgroundColor: Colors.orange, colorText: Colors.white);
     } catch (e) {
@@ -122,13 +103,9 @@ class ProfileController extends GetxController {
   // ==========================================
   void openExperienceForm({Map<String, dynamic>? exp}) {
     if (exp != null) {
-      // Setup untuk Edit Experience
       expTitleController.text = exp['title']?.toString() ?? "";
-
-      // Mapping 'creator' dari GET ke 'host_name' untuk PATCH
       expHostController.text = exp['creator']?.toString() ?? exp['host_name']?.toString() ?? "";
 
-      // Handle Date Format (ambil YYYY-MM-DD saja)
       String date = exp['date']?.toString() ?? "";
       if (date.length >= 10) date = date.substring(0, 10);
       expDateController.text = date;
@@ -136,12 +113,11 @@ class ProfileController extends GetxController {
       expDescController.text = exp['description']?.toString() ?? "";
       expImageUrl.value = exp['cover_image']?.toString() ?? "https://example.com/gamagudabo.jpg";
     } else {
-      // Setup untuk Add Experience baru
       expTitleController.clear();
       expHostController.clear();
       expDateController.clear();
       expDescController.clear();
-      expImageUrl.value = "https://example.com/gamagudabo.jpg"; // Default image
+      expImageUrl.value = "https://example.com/gamagudabo.jpg";
     }
   }
 
@@ -164,7 +140,6 @@ class ProfileController extends GetxController {
       },
     );
     if (picked != null) {
-      // Format ke YYYY-MM-DD
       expDateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
@@ -175,12 +150,7 @@ class ProfileController extends GetxController {
   Future<void> saveExperience({int? id}) async {
     try {
       isLoading.value = true;
-
       final token = box.read(StorageKeys.token);
-
-      final url = id == null
-          ? 'http://172.23.240.1:8080/api/user/profile/experience/'
-          : 'http://172.23.240.1:8080/api/user/profile/experience/$id';
 
       final body = {
         "title": expTitleController.text.trim(),
@@ -190,108 +160,62 @@ class ProfileController extends GetxController {
         "cover_image": expImageUrl.value,
       };
 
-      print("EXP URL: $url");
-      print("EXP BODY: $body");
-
-      final response = id == null
-          ? await dio.post(
-        url,
-        data: body,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        ),
-      )
-          : await dio.patch(
-        url,
-        data: body,
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        ),
-      );
-
-      print("SUCCESS STATUS: ${response.statusCode}");
-      print("SUCCESS BODY: ${response.data}");
+      if (id == null) {
+        await ProfileApi.createExperience(data: body, token: token);
+      } else {
+        await ProfileApi.updateExperience(id: id, data: body, token: token);
+      }
 
       Get.back();
       await fetchProfileData();
 
-      Get.snackbar(
-        'Sukses',
-        'Experience berhasil disimpan',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Sukses', 'Experience berhasil disimpan',
+          backgroundColor: Colors.green, colorText: Colors.white);
 
     } on DioException catch (e) {
-      print("ERROR STATUS: ${e.response?.statusCode}");
-      print("ERROR DATA: ${e.response?.data}");
-      print("ERROR LOCATION: ${e.response?.headers.value('location')}");
-
-      Get.snackbar(
-        'Gagal',
-        e.response?.data.toString() ?? 'Gagal menyimpan experience',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Gagal', e.response?.data.toString() ?? 'Gagal menyimpan experience',
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
   }
+
+  void showDeleteExperienceDialog(int id) {
+    Get.defaultDialog(
+      title: "Hapus Experience",
+      middleText: "Yakin ingin menghapus experience ini?",
+      textConfirm: "Hapus",
+      textCancel: "Batal",
+      confirmTextColor: Colors.white,
+      onConfirm: () {
+        Get.back();
+        deleteExperience(id);
+      },
+    );
+  }
+
   Future<void> deleteExperience(int id) async {
     try {
       isLoading.value = true;
-
       final token = box.read(StorageKeys.token);
 
-      final response = await dio.delete(
-        'http://172.23.240.1:8080/api/user/profile/experience/$id',
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-          },
-        ),
-      );
-
-      print("DELETE STATUS: ${response.statusCode}");
-      print("DELETE BODY: ${response.data}");
+      await ProfileApi.deleteExperience(id: id, token: token);
 
       await fetchProfileData();
 
-      Get.snackbar(
-        'Sukses',
-        'Experience berhasil dihapus',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Sukses', 'Experience berhasil dihapus',
+          backgroundColor: Colors.green, colorText: Colors.white);
     } on DioException catch (e) {
-      print("DELETE STATUS: ${e.response?.statusCode}");
-      print("DELETE BODY: ${e.response?.data}");
-
-      Get.snackbar(
-        'Gagal',
-        'Gagal menghapus experience',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      Get.snackbar('Gagal', 'Gagal menghapus experience',
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
   }
-  // 1. Tambahkan controllers untuk password
-  final oldPassController = TextEditingController();
-  final newPassController = TextEditingController();
-  final confirmPassController = TextEditingController();
 
-// 2. Tambahkan method untuk update password
+  // ==========================================
+  // LOGIC: UPDATE PASSWORD
+  // ==========================================
   Future<void> updatePassword() async {
     if (newPassController.text != confirmPassController.text) {
       Get.snackbar('Error', 'Password baru dan konfirmasi tidak sama',
@@ -303,20 +227,12 @@ class ProfileController extends GetxController {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
 
-      // 1. GANTI .post menjadi .patch
-      final response = await dio.patch(
-        'http://172.23.240.1:8080/api/user/profile/password',
+      await ProfileApi.updatePassword(
         data: {
           "old_password": oldPassController.text.trim(),
           "new_password": newPassController.text.trim(),
         },
-        options: Options(
-          headers: {
-            "Authorization": "Bearer $token",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        ),
+        token: token,
       );
 
       Get.back();
@@ -328,15 +244,10 @@ class ProfileController extends GetxController {
       confirmPassController.clear();
 
     } on DioException catch (e) {
-      // 2. PERBAIKAN LOGIC ERROR HANDLING
       String errorMessage = 'Gagal mengubah password';
-
-      // Cek apakah response data adalah Map/JSON
       if (e.response?.data != null && e.response!.data is Map) {
         errorMessage = e.response!.data['message'] ?? errorMessage;
-      }
-      // Cek apakah response data adalah String (biasanya saat error 404/500 dari server)
-      else if (e.response?.data is String) {
+      } else if (e.response?.data is String) {
         errorMessage = e.response!.data;
       }
 
@@ -357,18 +268,5 @@ class ProfileController extends GetxController {
     newPassController.dispose();
     confirmPassController.dispose();
     super.onClose();
-  }
-  void showDeleteExperienceDialog(int id) {
-    Get.defaultDialog(
-      title: "Hapus Experience",
-      middleText: "Yakin ingin menghapus experience ini?",
-      textConfirm: "Hapus",
-      textCancel: "Batal",
-      confirmTextColor: Colors.white,
-      onConfirm: () {
-        Get.back();
-        deleteExperience(id);
-      },
-    );
   }
 }

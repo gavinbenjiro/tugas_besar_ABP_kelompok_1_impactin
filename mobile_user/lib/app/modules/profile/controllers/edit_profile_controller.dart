@@ -1,10 +1,13 @@
+import 'dart:io'; // Untuk handling File
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile;
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../core/storage/storage_keys.dart';
-import '../../../core/api/profile_api.dart'; // Import Profile API
-import '../controllers/profile_controller.dart'; // Import ProfileController untuk refresh data setelah update
+import '../../../core/api/profile_api.dart';
+import '../../../core/api/cloudinary_api.dart';
+import '../controllers/profile_controller.dart';
 
 class EditProfileController extends GetxController {
   // Text Controllers
@@ -16,18 +19,76 @@ class EditProfileController extends GetxController {
   final skillController = TextEditingController();
   final usernameController = TextEditingController();
 
-  // Storage
+  // Storage & Image Picker
   final box = GetStorage();
+  final ImagePicker _picker = ImagePicker();
 
   // Reactive State
   var skills = <String>[].obs;
   var isLoading = false.obs;
-  var imageUrl = "".obs;
+  var imageUrl = "".obs; // URL dari API/Network
+  var localImagePath = "".obs; // Path file lokal jika user memilih gambar baru
 
   @override
   void onInit() {
     super.onInit();
     fetchProfileData();
+  }
+
+  // ==========================================
+  // IMAGE PICKER FUNCTIONS
+  // ==========================================
+  void showImagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text('Ubah Foto Profil', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Pilih dari Galeri'),
+                onTap: () {
+                  pickImage(ImageSource.gallery);
+                  Get.back(); // Tutup bottom sheet
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Ambil dari Kamera'),
+                onTap: () {
+                  pickImage(ImageSource.camera);
+                  Get.back();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 70, // Kompresi ringan agar upload tidak berat
+      );
+
+      if (pickedFile != null) {
+        // Simpan path lokal untuk ditampilkan di UI
+        localImagePath.value = pickedFile.path;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengakses gambar', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   // ==========================================
@@ -41,7 +102,6 @@ class EditProfileController extends GetxController {
 
       if (userId == null || token == null) return;
 
-      // Panggil dari ProfileApi
       final response = await ProfileApi.getProfile(
         userId: userId.toString(),
         token: token,
@@ -56,14 +116,12 @@ class EditProfileController extends GetxController {
         bioController.text = data['bio']?.toString() ?? "";
         imageUrl.value = data['image_url']?.toString() ?? "";
 
-        // Parse Skills
         if (data['skills'] is List) {
           skills.value = (data['skills'] as List).map((item) {
             return item is Map ? item['skills'].toString() : item.toString();
           }).toList();
         }
 
-        // Parse Age to DOB
         if (data['age'] != null) {
           int age = data['age'] is int ? data['age'] : int.tryParse(data['age'].toString()) ?? 0;
           int birthYear = DateTime.now().year - age;
@@ -90,6 +148,24 @@ class EditProfileController extends GetxController {
         return;
       }
 
+      // 1. Siapkan variabel untuk menyimpan URL gambar akhir
+      String finalImageUrl = imageUrl.value; // Default pakai URL lama
+
+      // 2. Jika user memilih gambar baru dari HP, upload ke Cloudinary dulu!
+      if (localImagePath.value.isNotEmpty) {
+        final uploadedUrl = await CloudinaryApi.uploadImage(localImagePath.value);
+
+        if (uploadedUrl != null) {
+          finalImageUrl = uploadedUrl; // Timpa dengan URL baru dari Cloudinary
+        } else {
+          Get.snackbar('Gagal', 'Gagal mengunggah gambar ke Cloudinary', backgroundColor: Colors.red, colorText: Colors.white);
+          isLoading.value = false;
+          return; // Hentikan proses jika gagal upload gambar
+        }
+      }
+
+      // 3. Susun JSON Request untuk dikirim ke Backend Impactin
+      // (Sekarang murni JSON biasa, tidak pakai FormData lagi)
       final requestBody = {
         "username": usernameController.text.trim(),
         "name": nameController.text.trim(),
@@ -97,33 +173,29 @@ class EditProfileController extends GetxController {
         "age": _calculateAge(dobController.text.trim()),
         "city": locationController.text.trim(),
         "bio": bioController.text.trim(),
-        "image_url": imageUrl.value,
+        "image_url": finalImageUrl, // <-- Masukkan URL (Bisa URL lama atau URL baru dari Cloudinary)
         "skills": skills.toList(),
       };
 
-      // 1. Panggil API Update Profile
+      // 4. Panggil API Update Profile
       await ProfileApi.updateProfile(
         data: requestBody,
         token: token,
       );
 
-      // 2. Refresh data di ProfileController utama (halaman sebelumnya)
+      // 5. Refresh data di halaman Profile
       if (Get.isRegistered<ProfileController>()) {
         Get.find<ProfileController>().fetchProfileData();
       }
 
-      // 3. KEMBALI DULU KE PROFILE PAGE (Tutup halaman Edit)
-      // closeOverlays: true memastikan jika ada dialog/snackbar yang nyangkut ikut tertutup
-      Get.back(closeOverlays: true); 
+      Get.back(closeOverlays: true);
 
-      // 4. BARU TAMPILKAN SNACKBAR SAKSES
-      // Snackbar ini sekarang akan muncul dengan rapi di atas halaman Profile Page
       Get.snackbar(
-        'Sukses', 
-        'Profil berhasil diperbarui', 
-        backgroundColor: Colors.green, 
+        'Sukses',
+        'Profil berhasil diperbarui',
+        backgroundColor: Colors.green,
         colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM, // Opsional: biar rapi di bawah
+        snackPosition: SnackPosition.BOTTOM,
       );
 
     } on DioException catch (e) {

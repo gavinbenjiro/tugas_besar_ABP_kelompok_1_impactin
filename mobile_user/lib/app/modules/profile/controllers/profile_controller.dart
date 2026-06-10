@@ -3,7 +3,9 @@ import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
 import '../../../core/storage/storage_keys.dart';
-import '../../../core/api/profile_api.dart'; // Import Profile API
+import '../../../core/api/profile_api.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../core/api/cloudinary_api.dart';
 
 class ProfileController extends GetxController {
   final box = GetStorage();
@@ -24,6 +26,9 @@ class ProfileController extends GetxController {
   var experiences = <dynamic>[].obs;
   var events = <dynamic>[].obs;
 
+  final ImagePicker _picker = ImagePicker();
+  var expImagePath = "".obs;
+
   // ==========================================
   // CONTROLLERS & STATE FOR EXPERIENCE FORM
   // ==========================================
@@ -42,6 +47,24 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfileData();
+  }
+
+  // ==========================================
+  // IMAGE PICKER
+  // ==========================================
+  Future<void> pickExperienceImage() async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery, // Langsung buka galeri saja biar cepat
+        imageQuality: 70,
+      );
+
+      if (pickedFile != null) {
+        expImagePath.value = pickedFile.path;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengakses galeri', backgroundColor: Colors.red, colorText: Colors.white);
+    }
   }
 
   // ==========================================
@@ -102,22 +125,21 @@ class ProfileController extends GetxController {
   // LOGIC: OPEN EXPERIENCE FORM DIALOG
   // ==========================================
   void openExperienceForm({Map<String, dynamic>? exp}) {
+    expImagePath.value = "";
+
     if (exp != null) {
-      expTitleController.text = exp['title']?.toString() ?? "";
-      expHostController.text = exp['creator']?.toString() ?? exp['host_name']?.toString() ?? "";
-
-      String date = exp['date']?.toString() ?? "";
-      if (date.length >= 10) date = date.substring(0, 10);
-      expDateController.text = date;
-
-      expDescController.text = exp['description']?.toString() ?? "";
-      expImageUrl.value = exp['cover_image']?.toString() ?? "https://example.com/gamagudabo.jpg";
+      // Mode Edit
+      expTitleController.text = exp['title'] ?? '';
+      // Gunakan 'host_name' sesuai dengan yang disimpan di database
+      expHostController.text = exp['host_name'] ?? '';
+      expDescController.text = exp['description'] ?? '';
+      expDateController.text = exp['date']?.toString() ?? '';
     } else {
+      // Mode Add
       expTitleController.clear();
       expHostController.clear();
-      expDateController.clear();
       expDescController.clear();
-      expImageUrl.value = "https://example.com/gamagudabo.jpg";
+      expDateController.clear();
     }
   }
 
@@ -151,49 +173,50 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
+      if (token == null) return;
 
-      final body = {
+      String? imageUrlFromCloudinary;
+      if (expImagePath.value.isNotEmpty) {
+        imageUrlFromCloudinary = await CloudinaryApi.uploadImage(expImagePath.value);
+        if (imageUrlFromCloudinary == null) {
+          Get.snackbar('Gagal', 'Upload gambar gagal', backgroundColor: Colors.red);
+          isLoading.value = false;
+          return;
+        }
+      }
+
+      // UBAH "creator" MENJADI "host_name"
+      final Map<String, dynamic> requestBody = {
         "title": expTitleController.text.trim(),
         "host_name": expHostController.text.trim(),
         "date": expDateController.text.trim(),
         "description": expDescController.text.trim(),
-        "cover_image": expImageUrl.value,
       };
 
-      if (id == null) {
-        await ProfileApi.createExperience(data: body, token: token);
-      } else {
-        await ProfileApi.updateExperience(id: id, data: body, token: token);
+      if (imageUrlFromCloudinary != null) {
+        requestBody["cover_image"] = imageUrlFromCloudinary;
       }
 
+      if (id == null) {
+        await ProfileApi.addExperience(data: requestBody, token: token);
+      } else {
+        await ProfileApi.editExperience(id: id, data: requestBody, token: token);
+      }
+
+      fetchProfileData();
       Get.back();
-      await fetchProfileData();
-
-      Get.snackbar('Sukses', 'Experience berhasil disimpan',
-          backgroundColor: Colors.green, colorText: Colors.white);
-
-    } on DioException catch (e) {
-      Get.snackbar('Gagal', e.response?.data.toString() ?? 'Gagal menyimpan experience',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Sukses', 'Experience berhasil disimpan', backgroundColor: Colors.green);
+    } catch (e) {
+      print("ERROR DETAIL: $e");
+      Get.snackbar('Gagal', 'Periksa terminal untuk detail error', backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
     }
   }
 
-  void showDeleteExperienceDialog(int id) {
-    Get.defaultDialog(
-      title: "Hapus Experience",
-      middleText: "Yakin ingin menghapus experience ini?",
-      textConfirm: "Hapus",
-      textCancel: "Batal",
-      confirmTextColor: Colors.white,
-      onConfirm: () {
-        Get.back();
-        deleteExperience(id);
-      },
-    );
-  }
-
+  // ==========================================
+  // LOGIC: DELETE EXPERIENCE
+  // ==========================================
   Future<void> deleteExperience(int id) async {
     try {
       isLoading.value = true;

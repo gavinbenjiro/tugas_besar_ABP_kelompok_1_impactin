@@ -25,19 +25,29 @@ class ProfileApi {
     );
   }
 
-  static Future<Response> createExperience({
+  // ==========================================
+  // ADD EXPERIENCE (POST)
+  // ==========================================
+  static Future<Response> addExperience({
     required Map<String, dynamic> data,
     required String token,
   }) {
-    // Menambahkan '/' di akhir sesuai dengan endpoint aslimu
     return ApiClient.dio.post(
-      '${ApiEndpoints.experience}/',
-      data: data,
-      options: _authOptions(token),
+      '${ApiEndpoints.experience}/', // Pastikan slash-nya sesuai kebutuhan backend
+      data: data, // Ini adalah JSON
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json', // WAJIB ada ini untuk backend Golang
+        },
+      ),
     );
   }
 
-  static Future<Response> updateExperience({
+  // ==========================================
+  // EDIT EXPERIENCE (PATCH)
+  // ==========================================
+  static Future<Response> editExperience({
     required int id,
     required Map<String, dynamic> data,
     required String token,
@@ -49,6 +59,9 @@ class ProfileApi {
     );
   }
 
+  // ==========================================
+  // DELETE EXPERIENCE (DELETE)
+  // ==========================================
   static Future<Response> deleteExperience({
     required int id,
     required String token,
@@ -59,6 +72,9 @@ class ProfileApi {
     );
   }
 
+  // ==========================================
+  // UPDATE PASSWORD (PATCH)
+  // ==========================================
   static Future<Response> updatePassword({
     required Map<String, dynamic> data,
     required String token,
@@ -69,6 +85,10 @@ class ProfileApi {
       options: _authOptions(token),
     );
   }
+
+  // ==========================================
+  // UPDATE PROFILE (PATCH)
+  // ==========================================
   static Future<Response> updateProfile({
     required Map<String, dynamic> data,
     required String token,

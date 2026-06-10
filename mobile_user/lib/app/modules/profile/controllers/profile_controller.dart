@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
@@ -40,6 +41,7 @@ class ProfileController extends GetxController {
 
   @override
   void onInit() {
+    print("ON INIT CALLED");
     super.onInit();
     fetchProfileData();
   }
@@ -111,7 +113,8 @@ class ProfileController extends GetxController {
       expDateController.text = date;
 
       expDescController.text = exp['description']?.toString() ?? "";
-      expImageUrl.value = exp['cover_image']?.toString() ?? "https://example.com/gamagudabo.jpg";
+      expImageUrl.value = exp['cover_image']?.toString() ??
+          "https://example.com/gamagudabo.jpg";
     } else {
       expTitleController.clear();
       expHostController.clear();
@@ -242,7 +245,6 @@ class ProfileController extends GetxController {
       oldPassController.clear();
       newPassController.clear();
       confirmPassController.clear();
-
     } on DioException catch (e) {
       String errorMessage = 'Gagal mengubah password';
       if (e.response?.data != null && e.response!.data is Map) {

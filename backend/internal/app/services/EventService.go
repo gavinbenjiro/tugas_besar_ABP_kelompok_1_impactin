@@ -37,9 +37,9 @@ type EventService interface {
 }
 
 type eventService struct {
-	eventRepo repositories.EventRepository
-	profileRepo repositories.ProfileRepository
-	applicantRepo repositories.ApplicantRepository
+	eventRepo       repositories.EventRepository
+	profileRepo     repositories.ProfileRepository
+	applicantRepo   repositories.ApplicantRepository
 	participantRepo repositories.ParticipantRepository
 }
 
@@ -114,26 +114,26 @@ func (s *eventService) CreateEvent(userID uint, dto request.EventRequestDto) (re
 	}
 
 	event := models.Event{
-		UserID:        	  userID,
-		Title:            dto.Title,
-		Category:         dto.Category,
-		Location:         dto.Location,
-		SpecificAddress:  dto.SpecificAddress,
-		AddressLink:      dto.AddressLink,
-		StartDate:        startDate,
-		EndDate:          endDate,
-		StartTime:        dto.StartTime,
-		EndTime:          dto.EndTime,
-		MaxParticipant:  dto.MaxParticipant,
+		UserID:             userID,
+		Title:              dto.Title,
+		Category:           dto.Category,
+		Location:           dto.Location,
+		SpecificAddress:    dto.SpecificAddress,
+		AddressLink:        dto.AddressLink,
+		StartDate:          startDate,
+		EndDate:            endDate,
+		StartTime:          dto.StartTime,
+		EndTime:            dto.EndTime,
+		MaxParticipant:     dto.MaxParticipant,
 		CurrentParticipant: 0,
-		CoverImage:      dto.CoverImage,
-		Description:     dto.Description,
-		Terms:           dto.Terms,
-		MinAge:          dto.MinAge,
-		MaxAge:          dto.MaxAge,
-		GroupLink:       dto.GroupLink,
-		Status:          "pending", 
-		SubStatus:       nil,
+		CoverImage:         dto.CoverImage,
+		Description:        dto.Description,
+		Terms:              dto.Terms,
+		MinAge:             dto.MinAge,
+		MaxAge:             dto.MaxAge,
+		GroupLink:          dto.GroupLink,
+		Status:             "pending",
+		SubStatus:          nil,
 	}
 
 	if err := s.eventRepo.Create(&event); err != nil {
@@ -141,32 +141,32 @@ func (s *eventService) CreateEvent(userID uint, dto request.EventRequestDto) (re
 	}
 
 	return response.EventResponseDto{
-		UserID: 	userID,
-		HostName: 	*profile.Name,
-		EventID:   	event.ID,
-		Title: 	   	event.Title,
-		Category:  	event.Category,
-		Location:  	event.Location,
+		UserID:          userID,
+		HostName:        *profile.Name,
+		EventID:         event.ID,
+		Title:           event.Title,
+		Category:        event.Category,
+		Location:        event.Location,
 		SpecificAddress: event.SpecificAddress,
-		AddressLink: event.AddressLink,
-		StartDate: 	event.StartDate.Format("2006-01-02"),
-		EndDate:   	event.EndDate.Format("2006-01-02"),
-		StartTime: event.StartTime,
-		EndTime: event.EndTime,
-		MaxParticipant: event.MaxParticipant,
-		CoverImage: event.CoverImage,
-		Description: event.Description,
-		Terms: event.Terms,
-		MinAge: event.MinAge,
-		MaxAge: event.MaxAge,
-		GroupLink: event.GroupLink,
-		Status: event.Status,
-		Message: "event created successfully, waiting for admin approval",
+		AddressLink:     event.AddressLink,
+		StartDate:       event.StartDate.Format("2006-01-02"),
+		EndDate:         event.EndDate.Format("2006-01-02"),
+		StartTime:       event.StartTime,
+		EndTime:         event.EndTime,
+		MaxParticipant:  event.MaxParticipant,
+		CoverImage:      event.CoverImage,
+		Description:     event.Description,
+		Terms:           event.Terms,
+		MinAge:          event.MinAge,
+		MaxAge:          event.MaxAge,
+		GroupLink:       event.GroupLink,
+		Status:          event.Status,
+		Message:         "event created successfully, waiting for admin approval",
 	}, nil
 }
 
 func (s *eventService) GetAllEvents(category, search string, ageRanges []string) ([]response.EventListResponseDto, error) {
-	
+
 	validCategories := map[string]bool{
 		"Environment": true,
 		"Health":      true,
@@ -188,13 +188,13 @@ func (s *eventService) GetAllEvents(category, search string, ageRanges []string)
 	var result []response.EventListResponseDto
 	for _, event := range events {
 		result = append(result, response.EventListResponseDto{
-			EventID:   event.EventID,
-			Title:    event.Title,
-			Category: event.Category,
+			EventID:    event.EventID,
+			Title:      event.Title,
+			Category:   event.Category,
 			CoverImage: event.CoverImage,
-			StartDate: event.StartDate,
-			Location: event.Location,
-			HostName: event.HostName,
+			StartDate:  event.StartDate,
+			Location:   event.Location,
+			HostName:   event.HostName,
 		})
 	}
 
@@ -209,6 +209,7 @@ func (s *eventService) GetYourCreatedEvents(userID uint, status string) ([]respo
 		"declined":  true,
 		"cancelled": true,
 		"completed": true,
+		"all":       true,
 	}
 
 	if !validStatus[status] {
@@ -221,6 +222,7 @@ func (s *eventService) GetYourCreatedEvents(userID uint, status string) ([]respo
 	}
 
 	return events, nil
+
 }
 
 func (s *eventService) GetYourCreatedEventDetail(userID, eventID uint) (*response.YourCreatedEventDetailResponseDto, error) {
@@ -268,9 +270,9 @@ func (s *eventService) GetYourCreatedEventDetail(userID, eventID uint) (*respons
 		*event.SubStatus == "closed" &&
 		now.Before(startDateTime) &&
 		event.CurrentParticipant < event.MaxParticipant {
-			canOpen = true
+		canOpen = true
 	}
-	
+
 	canClose := false
 	if event.Status == "approved" && event.SubStatus != nil && *event.SubStatus == "opened" {
 		canClose = true
@@ -282,16 +284,16 @@ func (s *eventService) GetYourCreatedEventDetail(userID, eventID uint) (*respons
 		Location:           event.Location,
 		StartDate:          event.StartDate,
 		CurrentParticipant: event.CurrentParticipant,
-		MaxParticipant: 	event.MaxParticipant,	
+		MaxParticipant:     event.MaxParticipant,
 		Status:             event.Status,
 		SubStatus:          *event.SubStatus,
-		CanOpen: 			canOpen,
-		CanClose: 			canClose,		
+		CanOpen:            canOpen,
+		CanClose:           canClose,
 		Applicants:         applicants,
 		Participants:       participants,
+		CoverImage:         event.CoverImage,
 	}, nil
 }
-
 
 func (s *eventService) GetEventDetail(eventID uint, userID uint) (*response.EventDetailResponseDto, error) {
 	event, hostID, groupLink, err := s.eventRepo.GetEventDetailByID(eventID)
@@ -474,8 +476,8 @@ func (s *eventService) JoinEvent(userID, eventID uint) (response.JoinEventRespon
 	return response.JoinEventResponseDto{
 		EventID: applicant.EventID,
 		UserID:  applicant.UserID,
-		Name:	 *profile.Name,
-		Age: 	 *profile.Age,
+		Name:    *profile.Name,
+		Age:     *profile.Age,
 		Message: "successfully joining event, waiting for host approval",
 	}, nil
 }
@@ -635,12 +637,12 @@ func (s *eventService) HostApplicantApproval(hostID uint, eventID uint, dto requ
 	}
 
 	return response.HostApplicantApprovalResponseDto{
-		EventID: eventID,
-		UserID:  dto.UserID,
-		Name: 	 *profile.Name,
-		Action:  dto.Action,
+		EventID:            eventID,
+		UserID:             dto.UserID,
+		Name:               *profile.Name,
+		Action:             dto.Action,
 		CurrentParticipant: event.CurrentParticipant,
-		Message: "success",
+		Message:            "success",
 	}, nil
 }
 
@@ -707,11 +709,11 @@ func (s *eventService) HostRemoveParticipant(hostID uint, eventID uint, dto requ
 	// }
 
 	return response.HostRemoveParticipantResponseDto{
-		EventID: eventID,
-		UserID:  dto.UserID,
-		Name: 	 *profile.Name,
+		EventID:            eventID,
+		UserID:             dto.UserID,
+		Name:               *profile.Name,
 		CurrentParticipant: event.CurrentParticipant,
-		Message: "participant removed successfully",
+		Message:            "participant removed successfully",
 	}, nil
 }
 
@@ -837,8 +839,8 @@ func (s *eventService) OpenEvent(userID, eventID uint) (response.EventSubStatusU
 
 func (s *eventService) GetYourJoinedEvents(userID uint, status string) ([]response.YourEventResponseDto, error) {
 	validStatus := map[string]bool{
-		"all":   true,
-		"ongoing":  true,
+		"all":       true,
+		"ongoing":   true,
 		"upcoming":  true,
 		"completed": true,
 		"cancelled": true,
@@ -876,11 +878,11 @@ func (s *eventService) AutoUpdateEventSubStatus() error {
 		if event.SubStatus == nil || *event.SubStatus == "cancelled" {
 			continue
 		}
-		
+
 		if *event.SubStatus == "closed" && newSubStatus == "opened" {
 			continue
 		}
-		
+
 		if *event.SubStatus != newSubStatus {
 			_ = s.eventRepo.UpdateSubStatus(event.ID, newSubStatus)
 		}

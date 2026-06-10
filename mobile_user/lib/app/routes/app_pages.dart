@@ -1,11 +1,15 @@
 import 'package:get/get.dart';
 
+import '../modules/create_event/bindings/create_event_binding.dart';
+import '../modules/create_event/views/create_event_view.dart';
 import '../modules/event_detail/bindings/event_detail_binding.dart';
 import '../modules/event_detail/views/event_detail_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/manage_event/bindings/manage_event_binding.dart';
+import '../modules/manage_event/views/manage_event_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
@@ -18,6 +22,8 @@ import '../modules/tes/bindings/tes_binding.dart';
 import '../modules/tes/views/tes_view.dart';
 import '../modules/your_event/bindings/your_event_binding.dart';
 import '../modules/your_event/views/your_event_view.dart';
+import '../modules/profile/bindings/edit_profile_binding.dart';
+import '../modules/profile/views/edit_profile_view.dart';
 
 part 'app_routes.dart';
 
@@ -42,11 +48,11 @@ class AppPages {
       page: () => const EventDetailView(),
       binding: EventDetailBinding(),
     ),
-    GetPage(
-      name: _Paths.SEARCH_EVENT,
-      page: () => const SearchEventView(),
-      binding: SearchEventBinding(),
-    ),
+    // GetPage(
+    //   name: _Paths.SEARCH_EVENT,
+    //   page: () => const SearchEventView(),
+    //   binding: SearchEventBinding(),
+    // ),
     GetPage(
       name: _Paths.YOUR_EVENT,
       page: () => const YourEventView(),
@@ -71,6 +77,21 @@ class AppPages {
       name: _Paths.TES,
       page: () => const TesView(),
       binding: TesBinding(),
+    ),
+    GetPage(
+      name: _Paths.CREATE_EVENT,
+      page: () => const CreateEventView(),
+      binding: CreateEventBinding(),
+    ),
+    GetPage(
+      name: _Paths.MANAGE_EVENT,
+      page: () => const ManageEventView(),
+      binding: ManageEventBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDIT_PROFILE,
+      page: () => const EditProfileView(),
+      binding: EditProfileBinding(),
     ),
   ];
 }

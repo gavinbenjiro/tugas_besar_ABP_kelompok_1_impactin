@@ -137,22 +137,203 @@ class EventDetailView extends GetView<EventDetailController> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          Column(
-                            children: [
-                              Icon(
-                                Icons.report_gmailerrorred,
-                                color: Colors.red.shade700,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Report',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.red.shade700,
-                                  fontWeight: FontWeight.w600,
+                          GestureDetector(
+                            onTap: () {
+                              final reportController = TextEditingController();
+
+                              Get.dialog(
+                                Dialog(
+                                  backgroundColor: const Color(0xFFF7F7F7),
+                                  insetPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 24,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  child: SingleChildScrollView(
+                                    padding: EdgeInsets.only(
+                                      left: 24,
+                                      right: 24,
+                                      top: 24,
+                                      bottom: MediaQuery.of(Get.context!)
+                                              .viewInsets
+                                              .bottom +
+                                          24,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.flag_outlined,
+                                              color: Colors.red.shade600,
+                                              size: 28,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Text(
+                                              'Report Event',
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0A4F46),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Tell us what is wrong with this event.',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 15,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        TextField(
+                                          controller: reportController,
+                                          autofocus: true,
+                                          maxLines: 4,
+                                          decoration: InputDecoration(
+                                            hintText: 'Describe the issue...',
+                                            hintStyle: TextStyle(
+                                              color: Colors.grey.shade500,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            contentPadding:
+                                                const EdgeInsets.all(18),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              borderSide: BorderSide(
+                                                color: Colors.grey.shade300,
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              borderSide: BorderSide(
+                                                color: Colors.grey.shade300,
+                                              ),
+                                            ),
+                                            focusedBorder:
+                                                const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(20),
+                                              ),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF0A4F46),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 52,
+                                                child: OutlinedButton(
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                    side: BorderSide(
+                                                      color:
+                                                          Colors.grey.shade300,
+                                                    ),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                    ),
+                                                  ),
+                                                  onPressed: () => Get.back(),
+                                                  child: const Text(
+                                                    'Cancel',
+                                                    style: TextStyle(
+                                                      color: Color(0xFF0A4F46),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 52,
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color(0xFF0A4F46),
+                                                    elevation: 0,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                    ),
+                                                  ),
+                                                  onPressed: () {
+                                                    if (reportController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      Get.snackbar(
+                                                        'Error',
+                                                        'Please enter a description',
+                                                      );
+                                                      return;
+                                                    }
+
+                                                    controller.reportEvent(
+                                                      reportController.text
+                                                          .trim(),
+                                                    );
+                                                  },
+                                                  child: const Text(
+                                                    'Submit',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.report_gmailerrorred,
+                                  color: Colors.red.shade700,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Report',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.red.shade700,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -218,27 +399,47 @@ class EventDetailView extends GetView<EventDetailController> {
         bottomNavigationBar: SafeArea(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
-            child: SizedBox(
-              height: 58,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF004D43),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  elevation: 0,
-                ),
-                onPressed: () {},
-                child: const Text(
-                  'Join Event',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            child: Obx(() {
+              final canJoin = controller.canJoin;
+
+              return SizedBox(
+                height: 58,
+                child: canJoin
+                    ? ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF004D43),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: controller.joinEvent,
+                        child: const Text(
+                          'Join Event',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          controller.joinStatusText,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+              );
+            }),
           ),
         ),
       );
@@ -338,6 +539,34 @@ class EventDetailView extends GetView<EventDetailController> {
               color: Color(0xFF0A4F46),
             ),
           ),
+          if (controller.showGroupLink &&
+              event.groupLink != null &&
+              event.groupLink!.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            const Text(
+              'Group Link',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0A4F46),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SelectableText(
+                event.groupLink!,
+                style: TextStyle(
+                  color: Colors.blueGrey.shade700,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Text(
             event.terms,

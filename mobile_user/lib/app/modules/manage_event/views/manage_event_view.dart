@@ -213,21 +213,30 @@ class ManageEventView extends GetView<ManageEventController> {
                             // =====================================
                             // ACTION BUTTONS
                             // =====================================
+
                             Row(
                               children: [
                                 Expanded(
                                   child: ElevatedButton(
-                                    onPressed: () {
-                                      if (event.canOpen) {
-                                        controller.openEvent();
-                                      } else if (event.canClose) {
-                                        controller.closeEvent();
-                                      }
-                                    },
+                                    onPressed:
+                                        (!event.canOpen && !event.canClose)
+                                            ? null
+                                            : () {
+                                                if (event.canOpen) {
+                                                  controller.openEvent();
+                                                } else if (event.canClose) {
+                                                  controller.closeEvent();
+                                                }
+                                              },
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: event.canOpen
-                                          ? Colors.green
-                                          : const Color(0xFFE6B325),
+                                      backgroundColor:
+                                          !event.canOpen && !event.canClose
+                                              ? Colors.grey.shade400
+                                              : event.canOpen
+                                                  ? Colors.green
+                                                  : const Color(0xFFE6B325),
+                                      disabledBackgroundColor:
+                                          Colors.grey.shade400,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
@@ -237,9 +246,11 @@ class ManageEventView extends GetView<ManageEventController> {
                                       ),
                                     ),
                                     child: Text(
-                                      event.canOpen
-                                          ? "Open Event"
-                                          : "Close Event",
+                                      !event.canOpen && !event.canClose
+                                          ? "Event Ongoing"
+                                          : event.canOpen
+                                              ? "Open Event"
+                                              : "Close Event",
                                       style: const TextStyle(
                                         color: Colors.white,
                                       ),

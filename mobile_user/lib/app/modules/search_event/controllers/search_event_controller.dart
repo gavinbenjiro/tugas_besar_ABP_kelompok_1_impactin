@@ -1,23 +1,69 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class SearchEventController extends GetxController {
-  //TODO: Implement SearchEventController
+import '../../../core/api/event_api.dart';
+import '../../../data/models/search_event_model.dart';
 
-  final count = 0.obs;
+class SearchEventController extends GetxController {
+  final searchController = TextEditingController();
+
+  final isLoading = false.obs;
+  final searchText = ''.obs;
+  final events = <SearchEventModel>[].obs;
+
+  final selectedCategory = 'All'.obs;
+
+  final selectedAges = <String>[].obs;
+
+  final categories = [
+    'All',
+    'Environment',
+    'Education',
+    'Health',
+    'Community',
+  ];
+
+  final ageRanges = [
+    '<16',
+    '16-20',
+    '21-30',
+    '31-45',
+    '>45',
+  ];
+
   @override
   void onInit() {
     super.onInit();
+
+    fetchEvents();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  Future<void> fetchEvents() async {
+    try {
+      isLoading.value = true;
+
+      final result = await EventApi.searchEvents(
+        category: selectedCategory.value,
+        search: searchController.text,
+        ages: selectedAges,
+      );
+
+      events.assignAll(result);
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        e.toString(),
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  @override
-  void onClose() {
-    super.onClose();
-  }
+  void clearFilters() {
+    selectedCategory.value = 'All';
+    selectedAges.clear();
+    searchController.clear();
 
-  void increment() => count.value++;
+    fetchEvents();
+  }
 }

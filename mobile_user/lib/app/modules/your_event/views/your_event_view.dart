@@ -279,7 +279,11 @@ class YourEventView extends GetView<YourEventController> {
                             itemBuilder: (context, index) {
                               return YourEventCard(
                                 event: controller.createdEvents[index],
-                                showManageButton: true,
+                                showManageButton: controller
+                                            .createdEvents[index].status ==
+                                        "approved" &&
+                                    controller.createdEvents[index].subStatus !=
+                                        "cancelled",
                               );
                             },
                           );

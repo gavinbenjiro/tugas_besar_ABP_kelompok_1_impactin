@@ -30,7 +30,8 @@ class ProfileView extends GetView<ProfileController> {
             onRefresh: controller.fetchProfileData,
             color: const Color(0xFF114B3A),
             child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+              physics: const AlwaysScrollableScrollPhysics(
+                  parent: BouncingScrollPhysics()),
               padding: EdgeInsets.only(
                 bottom: size.height * 0.14,
               ),
@@ -68,9 +69,12 @@ class ProfileView extends GetView<ProfileController> {
                                 CircleAvatar(
                                   radius: size.width * 0.11,
                                   backgroundColor: Colors.grey.shade300,
-                                  backgroundImage: controller.imageUrl.value.isNotEmpty
+                                  backgroundImage: controller
+                                          .imageUrl.value.isNotEmpty
                                       ? NetworkImage(controller.imageUrl.value)
-                                      : const AssetImage("assets/images/pp_dum1.jpg") as ImageProvider,
+                                      : const AssetImage(
+                                              "assets/images/pp_dum1.jpg")
+                                          as ImageProvider,
                                 ),
                                 SizedBox(width: size.width * 0.04),
 
@@ -79,11 +83,14 @@ class ProfileView extends GetView<ProfileController> {
                                 // =====================================
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(height: size.height * 0.01),
                                       Text(
-                                        controller.name.value.isEmpty ? "No Name" : controller.name.value,
+                                        controller.name.value.isEmpty
+                                            ? "No Name"
+                                            : controller.name.value,
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: size.width * 0.06,
@@ -94,7 +101,9 @@ class ProfileView extends GetView<ProfileController> {
                                       _infoRow(
                                         context,
                                         Icons.work_outline,
-                                        controller.status.value.isEmpty ? "Status belum diisi" : controller.status.value,
+                                        controller.status.value.isEmpty
+                                            ? "Status belum diisi"
+                                            : controller.status.value,
                                       ),
                                       SizedBox(height: size.height * 0.006),
                                       _infoRow(
@@ -106,7 +115,9 @@ class ProfileView extends GetView<ProfileController> {
                                       _infoRow(
                                         context,
                                         Icons.location_on_outlined,
-                                        controller.city.value.isEmpty ? "Lokasi belum diatur" : controller.city.value,
+                                        controller.city.value.isEmpty
+                                            ? "Lokasi belum diatur"
+                                            : controller.city.value,
                                       ),
                                     ],
                                   ),
@@ -220,28 +231,31 @@ class ProfileView extends GetView<ProfileController> {
                     title: "Skills",
                     child: controller.skills.isEmpty
                         ? Text(
-                      "Belum ada skill yang ditambahkan",
-                      style: TextStyle(color: Colors.grey.shade500, fontSize: size.width * 0.034),
-                    )
+                            "Belum ada skill yang ditambahkan",
+                            style: TextStyle(
+                                color: Colors.grey.shade500,
+                                fontSize: size.width * 0.034),
+                          )
                         : Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: controller.skills.map((skillItem) {
-                        // Extract skill text based on your JSON format
-                        String skillText = "";
-                        if (skillItem is Map && skillItem['skills'] != null) {
-                          skillText = skillItem['skills'].toString();
-                        } else if (skillItem is String) {
-                          skillText = skillItem;
-                        }
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: controller.skills.map((skillItem) {
+                              // Extract skill text based on your JSON format
+                              String skillText = "";
+                              if (skillItem is Map &&
+                                  skillItem['skills'] != null) {
+                                skillText = skillItem['skills'].toString();
+                              } else if (skillItem is String) {
+                                skillText = skillItem;
+                              }
 
-                        return _skillChip(
-                          skillText,
-                          Colors.green.shade50,
-                          Colors.green.shade800,
-                        );
-                      }).toList(),
-                    ),
+                              return _skillChip(
+                                skillText,
+                                Colors.green.shade50,
+                                Colors.green.shade800,
+                              );
+                            }).toList(),
+                          ),
                   ),
 
                   // =================================================
@@ -251,7 +265,8 @@ class ProfileView extends GetView<ProfileController> {
                     context,
                     title: "General Experience",
                     trailing: GestureDetector(
-                      onTap: () => _showExperienceDialog(context), // ACTION BUKA POPUP ADD
+                      onTap: () => _showExperienceDialog(
+                          context), // ACTION BUKA POPUP ADD
                       child: Container(
                         padding: EdgeInsets.symmetric(
                           horizontal: size.width * 0.04,
@@ -272,27 +287,30 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                     child: controller.experiences.isEmpty
                         ? Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        "Belum ada pengalaman yang ditambahkan",
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: size.width * 0.034),
-                      ),
-                    )
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              "Belum ada pengalaman yang ditambahkan",
+                              style: TextStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: size.width * 0.034),
+                            ),
+                          )
                         : Column(
-                      children: controller.experiences.map((exp) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16.0),
-                          child: _experienceCard(context, exp),
-                        );
-                      }).toList(),
-                    ),
+                            children: controller.experiences.map((exp) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: _experienceCard(context, exp),
+                              );
+                            }).toList(),
+                          ),
                   ),
 
                   // =================================================
                   // LOGOUT BUTTON
                   // =================================================
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.025),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: size.width * 0.025),
                     child: SizedBox(
                       width: double.infinity,
                       height: size.height * 0.065,
@@ -358,15 +376,12 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
-  // =========================================================
-  // SECTION CARD
-  // =========================================================
   Widget _sectionCard(
-      BuildContext context, {
-        required String title,
-        required Widget child,
-        Widget? trailing,
-      }) {
+    BuildContext context, {
+    required String title,
+    required Widget child,
+    Widget? trailing,
+  }) {
     final size = MediaQuery.of(context).size;
 
     return Container(
@@ -393,7 +408,8 @@ class ProfileView extends GetView<ProfileController> {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, color: const Color(0xFF114B3A), size: size.width * 0.05),
+              Icon(Icons.auto_awesome,
+                  color: const Color(0xFF114B3A), size: size.width * 0.05),
               SizedBox(width: size.width * 0.02),
               Expanded(
                 child: Text(
@@ -421,10 +437,12 @@ class ProfileView extends GetView<ProfileController> {
   Widget _skillChip(String text, Color bg, Color textColor) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
+      decoration:
+          BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
       child: Text(
         text,
-        style: TextStyle(color: textColor, fontWeight: FontWeight.w600, fontSize: 12),
+        style: TextStyle(
+            color: textColor, fontWeight: FontWeight.w600, fontSize: 12),
       ),
     );
   }
@@ -463,12 +481,13 @@ class ProfileView extends GetView<ProfileController> {
             ),
             child: coverUrl.isNotEmpty
                 ? Image.network(
-              coverUrl,
-              height: size.height * 0.18,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => _fallbackExperienceImage(size),
-            )
+                    coverUrl,
+                    height: size.height * 0.18,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _fallbackExperienceImage(size),
+                  )
                 : _fallbackExperienceImage(size),
           ),
           Padding(
@@ -487,23 +506,29 @@ class ProfileView extends GetView<ProfileController> {
                 SizedBox(height: size.height * 0.005),
                 Text(
                   creator,
-                  style: TextStyle(color: Colors.green, fontSize: size.width * 0.034),
+                  style: TextStyle(
+                      color: Colors.green, fontSize: size.width * 0.034),
                 ),
                 SizedBox(height: size.height * 0.01),
                 Row(
                   children: [
-                    Icon(Icons.calendar_today_outlined, size: size.width * 0.035, color: Colors.grey),
+                    Icon(Icons.calendar_today_outlined,
+                        size: size.width * 0.035, color: Colors.grey),
                     SizedBox(width: size.width * 0.02),
                     Text(
                       dateStr,
-                      style: TextStyle(color: Colors.grey, fontSize: size.width * 0.033),
+                      style: TextStyle(
+                          color: Colors.grey, fontSize: size.width * 0.033),
                     ),
                   ],
                 ),
                 SizedBox(height: size.height * 0.015),
                 Text(
                   description,
-                  style: TextStyle(color: Colors.grey.shade700, fontSize: size.width * 0.034, height: 1.5),
+                  style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: size.width * 0.034,
+                      height: 1.5),
                 ),
                 SizedBox(height: size.height * 0.02),
                 Row(
@@ -512,31 +537,46 @@ class ProfileView extends GetView<ProfileController> {
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.red.shade200),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          padding: EdgeInsets.symmetric(vertical: size.height * 0.016),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          padding: EdgeInsets.symmetric(
+                              vertical: size.height * 0.016),
                         ),
                         onPressed: () {
                           _showDeleteDialog(context, expId);
                         },
-                        child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                        child: const Text("Delete",
+                            style: TextStyle(color: Colors.red)),
                       ),
                     ),
-                    SizedBox(width: size.width * 0.04),
+                    SizedBox(width: size.width * 0.02),
                     Expanded(
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(color: Colors.green.shade200),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          padding: EdgeInsets.symmetric(vertical: size.height * 0.016),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          padding: EdgeInsets.symmetric(
+                              vertical: size.height * 0.016),
                         ),
                         onPressed: () {
                           // ACTION BUKA POPUP EDIT
                           _showExperienceDialog(context, experience: exp);
                         },
-                        child: const Text("Edit", style: TextStyle(color: Colors.green)),
+                        child: const Text("Edit",
+                            style: TextStyle(color: Colors.green)),
                       ),
                     ),
                   ],
+                ),
+                SizedBox(height: size.height * 0.015),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.grey.shade700,
+                    fontSize: size.width * 0.034,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -593,7 +633,8 @@ class ProfileView extends GetView<ProfileController> {
   // =========================================================
   // SHOW EXPERIENCE DIALOG (POP-UP ADD / EDIT)
   // =========================================================
-  void _showExperienceDialog(BuildContext context, {Map<String, dynamic>? experience}) {
+  void _showExperienceDialog(BuildContext context,
+      {Map<String, dynamic>? experience}) {
     final isEdit = experience != null;
 
     // Inisialisasi formulir dengan data / kosongkan jika mode Add
@@ -631,7 +672,8 @@ class ProfileView extends GetView<ProfileController> {
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.grey.shade400),
                         ),
-                        child: Icon(Icons.close, size: 16, color: Colors.grey.shade600),
+                        child: Icon(Icons.close,
+                            size: 16, color: Colors.grey.shade600),
                       ),
                     ),
                   ],
@@ -640,11 +682,14 @@ class ProfileView extends GetView<ProfileController> {
 
                 // Form Fields
                 _buildDialogTextField(
-                  hint: isEdit ? "Experience Name" : "Add your experience name...",
+                  hint: isEdit
+                      ? "Experience Name"
+                      : "Add your experience name...",
                   textController: controller.expTitleController,
                 ),
                 _buildDialogTextField(
-                  hint: isEdit ? "Host Name" : "Add your event category/host...",
+                  hint:
+                      isEdit ? "Host Name" : "Add your event category/host...",
                   textController: controller.expHostController,
                 ),
                 _buildDialogTextField(
@@ -652,12 +697,14 @@ class ProfileView extends GetView<ProfileController> {
                   textController: controller.expDateController,
                   readOnly: true, // Tidak bisa diketik manual
                   onTap: () => controller.selectExpDate(context),
-                  suffixIcon: Icon(Icons.calendar_month, color: Colors.grey.shade400),
+                  suffixIcon:
+                      Icon(Icons.calendar_month, color: Colors.grey.shade400),
                 ),
 
                 // Add Image Button (Placeholder)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
+<<<<<<< HEAD
                   child: Obx(() => GestureDetector(
                     onTap: () => controller.pickExperienceImage(), // Menghubungkan ke controller
                     child: Container(
@@ -704,11 +751,34 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                   )),
+=======
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.upload_file,
+                            size: 18, color: Colors.grey.shade600),
+                        const SizedBox(width: 8),
+                        Text("add image",
+                            style: TextStyle(
+                                color: Colors.grey.shade600, fontSize: 14)),
+                      ],
+                    ),
+                  ),
+>>>>>>> aa520cb01b6023f399a89eb4a45fde478b62b7c3
                 ),
 
                 // Description Field
                 _buildDialogTextField(
-                  hint: isEdit ? "Description" : "Add your event description here",
+                  hint: isEdit
+                      ? "Description"
+                      : "Add your event description here",
                   textController: controller.expDescController,
                   maxLines: 4,
                 ),
@@ -853,7 +923,8 @@ class ProfileView extends GetView<ProfileController> {
           hintText: hint,
           hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
           suffixIcon: suffixIcon,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: Colors.grey.shade300),

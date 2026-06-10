@@ -12,41 +12,41 @@ import (
 )
 
 type EventRepository interface {
-   Create(event *models.Event) error
-   GetEventByID(eventID uint) (*models.Event, error)
-   GetAllEvents(category, search string, ageRanges []string) ([]response.EventListResponseDto, error)
-   GetYourCreatedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
-   GetEventDetailByID(eventID uint) (*response.EventDetailResponseDto, uint, *string, error)
-   GetCarouselEvents() (map[string]*response.EventCarouselItemDto, error)
-   GetRecommendationCandidates(userID uint) ([]response.RecommendationCandidate, error)
-   GetFallbackRecommendation() ([]response.EventRecommendationItemDto, error)
-   GetUserCategoryHistory(userID uint) (map[string]int, error)
-   GetEventForJoin(eventID uint) (*response.EventJoinCheckDto, error)
-   AdminGetAllEvents(status, search string) ([]response.AdminEventsResponseDto, int64, error)
-   AdminGetEventDetail(eventID uint) (*response.EventResponseDto, error)
-   UpdateApprovalStatus(event *models.Event) error
-   UpdateSubStatus(eventID uint, subStatus string) error
-   IncrementParticipant(tx *gorm.DB, eventID uint) error
-   DecrementParticipant(eventID uint) error
-   WithTx(fn func(tx *gorm.DB) error) error
-   GetEventByIDAndHost(eventID, userID uint) (*models.Event, error)
-   GetApplicantsByEventID(eventID uint) ([]response.EventUserDto, error)
-   GetParticipantsByEventID(eventID uint) ([]response.EventUserDto, error)
-   GetJoinedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
-   GetCompletedEventsByParticipant(userID uint) ([]response.ProfileCompletedEventDto, error)
-   GetApprovedEvents() ([]models.Event, error)
+	Create(event *models.Event) error
+	GetEventByID(eventID uint) (*models.Event, error)
+	GetAllEvents(category, search string, ageRanges []string) ([]response.EventListResponseDto, error)
+	GetYourCreatedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
+	GetEventDetailByID(eventID uint) (*response.EventDetailResponseDto, uint, *string, error)
+	GetCarouselEvents() (map[string]*response.EventCarouselItemDto, error)
+	GetRecommendationCandidates(userID uint) ([]response.RecommendationCandidate, error)
+	GetFallbackRecommendation() ([]response.EventRecommendationItemDto, error)
+	GetUserCategoryHistory(userID uint) (map[string]int, error)
+	GetEventForJoin(eventID uint) (*response.EventJoinCheckDto, error)
+	AdminGetAllEvents(status, search string) ([]response.AdminEventsResponseDto, int64, error)
+	AdminGetEventDetail(eventID uint) (*response.EventResponseDto, error)
+	UpdateApprovalStatus(event *models.Event) error
+	UpdateSubStatus(eventID uint, subStatus string) error
+	IncrementParticipant(tx *gorm.DB, eventID uint) error
+	DecrementParticipant(eventID uint) error
+	WithTx(fn func(tx *gorm.DB) error) error
+	GetEventByIDAndHost(eventID, userID uint) (*models.Event, error)
+	GetApplicantsByEventID(eventID uint) ([]response.EventUserDto, error)
+	GetParticipantsByEventID(eventID uint) ([]response.EventUserDto, error)
+	GetJoinedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
+	GetCompletedEventsByParticipant(userID uint) ([]response.ProfileCompletedEventDto, error)
+	GetApprovedEvents() ([]models.Event, error)
 }
 
 type eventRepository struct {
-   db *gorm.DB
+	db *gorm.DB
 }
 
 func NewEventRepository(db *gorm.DB) EventRepository {
-   return &eventRepository{db}
+	return &eventRepository{db}
 }
 
 func (r *eventRepository) Create(event *models.Event) error {
-   return r.db.Create(event).Error
+	return r.db.Create(event).Error
 }
 
 func (r *eventRepository) GetEventByID(eventID uint) (*models.Event, error) {
@@ -71,12 +71,12 @@ func (r *eventRepository) GetAllEvents(category, search string, ageRanges []stri
 		Joins("JOIN profiles ON profiles.user_id = events.user_id").
 		Where("events.status = ?", "approved").
 		Where("events.sub_status IN ?", []string{"opened", "closed"})
-		
-   if category != "" {
-      query = query.Where("LOWER(events.category) = LOWER(?)", category)
-   }
 
-   if search != "" {
+	if category != "" {
+		query = query.Where("LOWER(events.category) = LOWER(?)", category)
+	}
+
+	if search != "" {
 		keyword := "%" + strings.ToLower(search) + "%"
 		query = query.Where(`
 		(
@@ -94,7 +94,7 @@ func (r *eventRepository) GetAllEvents(category, search string, ageRanges []stri
 		for _, r := range ageRanges {
 			switch r {
 			case "<16":
-				ageQuery = ageQuery.Or(`events.min_age < ?`, 16) 
+				ageQuery = ageQuery.Or(`events.min_age < ?`, 16)
 			case "16-20":
 				ageQuery = ageQuery.Or(`(events.max_age >= ? OR events.max_age >= ?) AND (events.min_age <= ? OR events.min_age <= ?) OR (events.min_age <= ? AND events.max_age = 0)`, 16, 20, 16, 20, 16)
 			case "21-30":
@@ -108,7 +108,7 @@ func (r *eventRepository) GetAllEvents(category, search string, ageRanges []stri
 		query = query.Where(ageQuery)
 	}
 
-   err := query.Order("events.id ASC").Scan(&events).Error
+	err := query.Order("events.id ASC").Scan(&events).Error
 
 	return events, err
 }
@@ -450,7 +450,6 @@ func (r *eventRepository) UpdateSubStatus(eventID uint, subStatus string) error 
 		Update("sub_status", subStatus).Error
 }
 
-
 func (r *eventRepository) IncrementParticipant(tx *gorm.DB, eventID uint) error {
 	return tx.Model(&models.Event{}).
 		Where("id = ?", eventID).
@@ -538,7 +537,7 @@ func (r *eventRepository) GetJoinedEvents(userID uint, status string) ([]respons
 			? < TIMESTAMP(DATE(events.start_date), events.start_time)
 			AND events.sub_status != ?
 			AND events.sub_status != ?
-		`, now, "completed", "cancelled")	
+		`, now, "completed", "cancelled")
 
 	case "completed":
 		query = query.Where(`events.sub_status = ?`, "completed")
@@ -546,7 +545,7 @@ func (r *eventRepository) GetJoinedEvents(userID uint, status string) ([]respons
 	case "cancelled":
 		query = query.Where("events.sub_status = ?", "cancelled")
 
-	// case "all" → tidak perlu tambahan status
+		// case "all" → tidak perlu tambahan status
 	}
 
 	err := query.

@@ -6,299 +6,447 @@ import '../controllers/event_detail_controller.dart';
 class EventDetailView extends GetView<EventDetailController> {
   const EventDetailView({super.key});
 
+  String _formatDate(String isoString) {
+    final dt = DateTime.parse(isoString).toLocal();
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = dt.month.toString().padLeft(2, '0');
+    final year = dt.year;
+    return "$day/$month/$year";
+  }
+
   @override
   Widget build(BuildContext context) {
-    final event = controller.event;
-    final width = MediaQuery.of(context).size.width;
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Scaffold(
+          body: Center(child: CircularProgressIndicator()),
+        );
+      }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      if (controller.errorMessage.value.isNotEmpty) {
+        return Scaffold(
+          body: Center(
+            child: Text(controller.errorMessage.value),
+          ),
+        );
+      }
 
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                // COVER IMAGE
-                SizedBox(
-                  height: width * 0.95,
-                  width: double.infinity,
-                  child: Image.asset(
-                    event.coverImage,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+      final event = controller.event.value!;
+      final width = MediaQuery.of(context).size.width;
 
-                // BACK BUTTON
-                Positioned(
-                  top: 56,
-                  left: 20,
-                  child: GestureDetector(
-                    onTap: () => Get.back(),
-                    child: Container(
-                      width: 42,
-                      height: 42,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+      return Scaffold(
+        backgroundColor: const Color(0xFFF7F7F7),
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  SizedBox(
+                    height: width * 0.95,
+                    width: double.infinity,
+                    child: Image.network(
+                      event.coverImage,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.grey.shade300,
+                        child: const Center(
+                          child: Icon(Icons.image, size: 60),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.arrow_back_ios_new,
-                        size: 18,
-                      ),
                     ),
                   ),
-                ),
-
-                // AGE CHIP
-                Positioned(
-                  left: 20,
-                  bottom: -20,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1F5C53),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.person_outline,
+                  Positioned(
+                    top: 56,
+                    left: 20,
+                    child: GestureDetector(
+                      onTap: () => Get.back(),
+                      child: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: const BoxDecoration(
                           color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
                           size: 18,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "${event.minAge}-${event.maxAge}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            // MAIN CONTENT
-            Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF7F7F7),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(34),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  20,
-                  10,
-                  20,
-                  120,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // TITLE + REPORT
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            event.title,
-                            style: const TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF0A4F46),
-                              height: 1.1,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          children: [
-                            Icon(
-                              Icons.report_gmailerrorred,
-                              color: Colors.red.shade700,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              'Report',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.red.shade700,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // DATE
-                    _infoTile(
-                      Icons.calendar_today_outlined,
-                      "${event.startDate} - ${event.endDate}",
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // TIME
-                    _infoTile(
-                      Icons.access_time,
-                      "${event.startTime} - ${event.endTime} WIB",
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // LOCATION
-                    _infoTile(
-                      Icons.location_on_outlined,
-                      event.location,
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // PARTICIPANTS
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 120,
-                          height: 34,
-                          child: Stack(
-                            children: [
-                              _avatar(0),
-                              _avatar(24),
-                              _avatar(48),
-                              _avatar(72),
-                              Positioned(
-                                left: 96,
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: const Color(
-                                      0xFF5E756F,
-                                    ),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: const Center(
-                                    child: Text(
-                                      '+99',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          "105 participants",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // TABS
-                    Obx(
-                      () => Row(
+                  Positioned(
+                    left: 20,
+                    bottom: -20,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1F5C53),
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                      child: Row(
                         children: [
-                          Expanded(
-                            child: _tabItem(
-                              title: 'About',
-                              index: 0,
-                            ),
+                          const Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                            size: 18,
                           ),
-                          Expanded(
-                            child: _tabItem(
-                              title: 'Location',
-                              index: 1,
+                          const SizedBox(width: 8),
+                          Text(
+                            "${event.minAge}-${event.maxAge}",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
                     ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF7F7F7),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(34),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              event.title,
+                              style: const TextStyle(
+                                fontSize: 34,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0A4F46),
+                                height: 1.1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () {
+                              final reportController = TextEditingController();
 
-                    const SizedBox(height: 22),
+                              Get.dialog(
+                                Dialog(
+                                  backgroundColor: const Color(0xFFF7F7F7),
+                                  insetPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 24,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(28),
+                                  ),
+                                  child: SingleChildScrollView(
+                                    padding: EdgeInsets.only(
+                                      left: 24,
+                                      right: 24,
+                                      top: 24,
+                                      bottom: MediaQuery.of(Get.context!)
+                                              .viewInsets
+                                              .bottom +
+                                          24,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.flag_outlined,
+                                              color: Colors.red.shade600,
+                                              size: 28,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Text(
+                                              'Report Event',
+                                              style: TextStyle(
+                                                fontSize: 26,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF0A4F46),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          'Tell us what is wrong with this event.',
+                                          style: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 15,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 20),
+                                        TextField(
+                                          controller: reportController,
+                                          autofocus: true,
+                                          maxLines: 4,
+                                          decoration: InputDecoration(
+                                            hintText: 'Describe the issue...',
+                                            hintStyle: TextStyle(
+                                              color: Colors.grey.shade500,
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.white,
+                                            contentPadding:
+                                                const EdgeInsets.all(18),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              borderSide: BorderSide(
+                                                color: Colors.grey.shade300,
+                                              ),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                              borderSide: BorderSide(
+                                                color: Colors.grey.shade300,
+                                              ),
+                                            ),
+                                            focusedBorder:
+                                                const OutlineInputBorder(
+                                              borderRadius: BorderRadius.all(
+                                                Radius.circular(20),
+                                              ),
+                                              borderSide: BorderSide(
+                                                color: Color(0xFF0A4F46),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 24),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 52,
+                                                child: OutlinedButton(
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                    side: BorderSide(
+                                                      color:
+                                                          Colors.grey.shade300,
+                                                    ),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                    ),
+                                                  ),
+                                                  onPressed: () => Get.back(),
+                                                  child: const Text(
+                                                    'Cancel',
+                                                    style: TextStyle(
+                                                      color: Color(0xFF0A4F46),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: SizedBox(
+                                                height: 52,
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        const Color(0xFF0A4F46),
+                                                    elevation: 0,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              16),
+                                                    ),
+                                                  ),
+                                                  onPressed: () {
+                                                    if (reportController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      Get.snackbar(
+                                                        'Error',
+                                                        'Please enter a description',
+                                                      );
+                                                      return;
+                                                    }
 
-                    // TAB CONTENT
-                    Obx(
-                      () => controller.selectedTab.value == 0
-                          ? _aboutSection(event)
-                          : _locationSection(event),
-                    ),
-                  ],
+                                                    controller.reportEvent(
+                                                      reportController.text
+                                                          .trim(),
+                                                    );
+                                                  },
+                                                  child: const Text(
+                                                    'Submit',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.report_gmailerrorred,
+                                  color: Colors.red.shade700,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Report',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.red.shade700,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 18),
+                      _infoTile(
+                        Icons.calendar_today_outlined,
+                        "${_formatDate(event.startDate)} - ${_formatDate(event.endDate)}",
+                      ),
+                      const SizedBox(height: 10),
+                      _infoTile(
+                        Icons.access_time,
+                        "${event.startTime} - ${event.endTime} WIB",
+                      ),
+                      const SizedBox(height: 10),
+                      _infoTile(
+                        Icons.location_on_outlined,
+                        event.location,
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        children: [
+                          Text(
+                            event.hostName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      Obx(
+                        () => Row(
+                          children: [
+                            Expanded(
+                              child: _tabItem(
+                                title: 'About',
+                                index: 0,
+                              ),
+                            ),
+                            Expanded(
+                              child: _tabItem(
+                                title: 'Location',
+                                index: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 22),
+                      Obx(
+                        () => controller.selectedTab.value == 0
+                            ? _aboutSection(event)
+                            : _locationSection(event),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-
-      // BUTTON
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            24,
-            10,
-            24,
-            24,
+            ],
           ),
-          child: SizedBox(
-            height: 58,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF004D43),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                elevation: 0,
-              ),
-              onPressed: () {},
-              child: const Text(
-                'Join Event',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+        ),
+        bottomNavigationBar: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+            child: Obx(() {
+              final canJoin = controller.canJoin;
+
+              return SizedBox(
+                height: 58,
+                child: canJoin
+                    ? ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF004D43),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: controller.joinEvent,
+                        child: const Text(
+                          'Join Event',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      )
+                    : Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          controller.joinStatusText,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ),
+              );
+            }),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
-  Widget _infoTile(
-    IconData icon,
-    String text,
-  ) {
+  Widget _infoTile(IconData icon, String text) {
     return Row(
       children: [
         Icon(
@@ -317,29 +465,6 @@ class EventDetailView extends GetView<EventDetailController> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _avatar(double left) {
-    return Positioned(
-      left: left,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: Colors.white,
-            width: 2,
-          ),
-          image: const DecorationImage(
-            image: AssetImage(
-              'assets/images/ev_dum2.jpg',
-            ),
-            fit: BoxFit.cover,
-          ),
-        ),
-      ),
     );
   }
 
@@ -414,6 +539,34 @@ class EventDetailView extends GetView<EventDetailController> {
               color: Color(0xFF0A4F46),
             ),
           ),
+          if (controller.showGroupLink &&
+              event.groupLink != null &&
+              event.groupLink!.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            const Text(
+              'Group Link',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0A4F46),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SelectableText(
+                event.groupLink!,
+                style: TextStyle(
+                  color: Colors.blueGrey.shade700,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Text(
             event.terms,

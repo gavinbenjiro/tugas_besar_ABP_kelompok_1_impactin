@@ -123,7 +123,15 @@ class EditProfileController extends GetxController {
         }
 
         if (data['age'] != null) {
+<<<<<<< HEAD
           ageController.text = data['age'].toString();
+=======
+          int age = data['age'] is int
+              ? data['age']
+              : int.tryParse(data['age'].toString()) ?? 0;
+          int birthYear = DateTime.now().year - age;
+          dobController.text = "01-01-$birthYear";
+>>>>>>> aa520cb01b6023f399a89eb4a45fde478b62b7c3
         }
       }
     } catch (e) {
@@ -197,8 +205,10 @@ class EditProfileController extends GetxController {
       );
 
     } on DioException catch (e) {
-      String msg = e.response?.data?['error']?.toString() ?? "Gagal menyimpan profil";
-      Get.snackbar('Gagal', msg, backgroundColor: Colors.red, colorText: Colors.white);
+      String msg =
+          e.response?.data?['error']?.toString() ?? "Gagal menyimpan profil";
+      Get.snackbar('Gagal', msg,
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }

@@ -12,7 +12,7 @@ import '../controllers/profile_controller.dart';
 class EditProfileController extends GetxController {
   // Text Controllers
   final nameController = TextEditingController();
-  final dobController = TextEditingController();
+  final ageController = TextEditingController();
   final statusController = TextEditingController();
   final locationController = TextEditingController();
   final bioController = TextEditingController();
@@ -123,9 +123,7 @@ class EditProfileController extends GetxController {
         }
 
         if (data['age'] != null) {
-          int age = data['age'] is int ? data['age'] : int.tryParse(data['age'].toString()) ?? 0;
-          int birthYear = DateTime.now().year - age;
-          dobController.text = "01-01-$birthYear";
+          ageController.text = data['age'].toString();
         }
       }
     } catch (e) {
@@ -170,7 +168,7 @@ class EditProfileController extends GetxController {
         "username": usernameController.text.trim(),
         "name": nameController.text.trim(),
         "status": statusController.text.trim(),
-        "age": _calculateAge(dobController.text.trim()),
+        "age": int.tryParse(ageController.text.trim()) ?? 0,
         "city": locationController.text.trim(),
         "bio": bioController.text.trim(),
         "image_url": finalImageUrl, // <-- Masukkan URL (Bisa URL lama atau URL baru dari Cloudinary)
@@ -206,26 +204,7 @@ class EditProfileController extends GetxController {
     }
   }
 
-  // ==========================================
-  // HELPER FUNCTIONS
-  // ==========================================
-  int _calculateAge(String dobStr) {
-    try {
-      final parts = dobStr.split('-');
-      if (parts.length == 3) return DateTime.now().year - int.parse(parts[2]);
-    } catch (_) {}
-    return 20;
-  }
 
-  void selectDate(BuildContext context) async {
-    DateTime? picked = await showDatePicker(
-        context: context,
-        initialDate: DateTime(2000),
-        firstDate: DateTime(1950),
-        lastDate: DateTime.now()
-    );
-    if (picked != null) dobController.text = "${picked.day}-${picked.month}-${picked.year}";
-  }
 
   void addSkill() {
     if (skillController.text.isNotEmpty) {
@@ -240,11 +219,11 @@ class EditProfileController extends GetxController {
   void onClose() {
     usernameController.dispose();
     nameController.dispose();
-    dobController.dispose();
     statusController.dispose();
     locationController.dispose();
     bioController.dispose();
     skillController.dispose();
+    ageController.dispose();
     super.onClose();
   }
 }

@@ -96,12 +96,10 @@ class EditProfileView extends GetView<EditProfileController> {
             _buildLabel('Full Name'),
             _buildTextField(controller: controller.nameController),
 
-            _buildLabel('Date of Birth'),
+            _buildLabel('Age'),
             _buildTextField(
-              controller: controller.dobController,
-              suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey, size: 20),
-              readOnly: true,
-              onTap: () => controller.selectDate(context),
+              controller: controller.ageController,
+              keyboardType: TextInputType.number, // Memunculkan keyboard angka
             ),
 
             _buildLabel('Status'),
@@ -226,12 +224,14 @@ class EditProfileView extends GetView<EditProfileController> {
     Widget? suffixIcon,
     bool readOnly = false,
     VoidCallback? onTap,
+    TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       readOnly: readOnly,
       onTap: onTap,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFFFAFAFA),

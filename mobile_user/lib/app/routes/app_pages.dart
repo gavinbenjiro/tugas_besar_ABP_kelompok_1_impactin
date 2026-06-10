@@ -9,11 +9,14 @@ import '../modules/login/views/login_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/edit_profile_view.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
 import '../modules/search_event/bindings/search_event_binding.dart';
 import '../modules/search_event/views/search_event_view.dart';
+import '../modules/splash/bindings/splash_binding.dart';
+import '../modules/splash/views/splash_view.dart';
 import '../modules/tes/bindings/tes_binding.dart';
 import '../modules/tes/views/tes_view.dart';
 import '../modules/your_event/bindings/your_event_binding.dart';
@@ -24,18 +27,31 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.ONBOARDING;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: Routes.SPLASH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+    ),
     GetPage(
       name: _Paths.HOME,
       page: () => const HomeView(),
       binding: HomeBinding(),
     ),
     GetPage(
-      name: _Paths.ONBOARDING,
-      page: () => OnboardingView(), // <-- TANPA CONST
+      name: _Paths.EDIT_PROFILE,
+      page: () => const EditProfileView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: Routes.ONBOARDING,
+      page: () => OnboardingView(),
       binding: OnboardingBinding(),
+      // --- Tambahkan dua baris di bawah ini ---
+      transition: Transition.fade,
+      transitionDuration: const Duration(milliseconds: 800),
     ),
     GetPage(
       name: _Paths.EVENT_DETAIL,
@@ -71,6 +87,11 @@ class AppPages {
       name: _Paths.TES,
       page: () => const TesView(),
       binding: TesBinding(),
+    ),
+    GetPage(
+      name: _Paths.SPLASH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
     ),
   ];
 }

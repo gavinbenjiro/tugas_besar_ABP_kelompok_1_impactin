@@ -40,5 +40,9 @@ class ApiEndpoints {
 
   static String joinEvent(int eventId) => "/user/events/join/$eventId";
   static String reportEvent(int eventId) => "/user/events/report/$eventId";
+
   static const saveFcmToken = "/user/fcm-token";
+  static const getNotifications = "/notifications";
+  static const bellStatus = "/notification/bell-status";
+  static const markBellRead = "/notification";
 }

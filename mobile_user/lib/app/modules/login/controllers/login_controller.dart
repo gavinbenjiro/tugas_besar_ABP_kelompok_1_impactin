@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -17,13 +18,6 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
 
-      final requestBody = {
-        "username": usernameController.text.trim(),
-        "password": passwordController.text.trim(),
-      };
-
-      print(requestBody);
-
       final response = await AuthApi.login(
         username: usernameController.text.trim(),
         password: passwordController.text.trim(),
@@ -31,36 +25,19 @@ class LoginController extends GetxController {
 
       final data = response.data;
 
-      box.write(
-        StorageKeys.token,
-        data["token"],
-      );
+      box.write(StorageKeys.token, data["token"]);
+      box.write(StorageKeys.userId, data["data"]["id"]);
+      box.write(StorageKeys.username, data["data"]["username"]);
+      box.write(StorageKeys.email, data["data"]["email"]);
 
-      box.write(
-        StorageKeys.userId,
-        data["data"]["id"],
-      );
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await AuthApi.saveFcmToken(fcmToken);
+      }
 
-      box.write(
-        StorageKeys.username,
-        data["data"]["username"],
-      );
+      Get.snackbar("Success", data["message"]);
 
-      box.write(
-        StorageKeys.email,
-        data["data"]["email"],
-      );
-
-      Get.snackbar(
-        "Success",
-        data["message"],
-      );
-
-      print(box.read(StorageKeys.token));
-
-      Get.offAllNamed(
-        Routes.HOME,
-      );
+      Get.offAllNamed(Routes.HOME);
     } on DioException catch (e) {
       print("STATUS: ${e.response?.statusCode}");
       print("BODY: ${e.response?.data}");

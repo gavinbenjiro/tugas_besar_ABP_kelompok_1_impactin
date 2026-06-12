@@ -10,8 +10,11 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/manage_event/bindings/manage_event_binding.dart';
 import '../modules/manage_event/views/manage_event_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
+import '../modules/profile/bindings/edit_profile_binding.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/edit_profile_view.dart';
 import '../modules/profile/views/profile_view.dart';
@@ -25,8 +28,6 @@ import '../modules/tes/bindings/tes_binding.dart';
 import '../modules/tes/views/tes_view.dart';
 import '../modules/your_event/bindings/your_event_binding.dart';
 import '../modules/your_event/views/your_event_view.dart';
-import '../modules/profile/bindings/edit_profile_binding.dart';
-import '../modules/profile/views/edit_profile_view.dart';
 
 part 'app_routes.dart';
 
@@ -113,6 +114,11 @@ class AppPages {
       name: _Paths.EDIT_PROFILE,
       page: () => const EditProfileView(),
       binding: EditProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATION,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
     ),
   ];
 }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:mobile_user/app/core/api/notification_api.dart';
 
 import '../../../core/api/event_api.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,7 @@ class HomeController extends GetxController {
   final events = <dynamic>[].obs;
 
   final isLoading = false.obs;
-
+  final hasUnreadNotification = false.obs;
   final selectedCategory = 'All'.obs;
   final currentBannerIndex = 0.obs;
   final bannerPageController = PageController();
@@ -20,6 +21,17 @@ class HomeController extends GetxController {
     super.onInit();
     getEvents();
     getRecommendationEvents();
+    getBellStatus();
+  }
+
+  Future<void> getBellStatus() async {
+    try {
+      final response = await NotificationApi.getBellStatus();
+
+      hasUnreadNotification.value = response.data["has_unread"] ?? false;
+    } on DioException catch (e) {
+      print(e.response?.data);
+    }
   }
 
   Future<void> getEvents() async {

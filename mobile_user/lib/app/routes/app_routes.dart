@@ -16,7 +16,12 @@ abstract class Routes {
   static const SPLASH = _Paths.SPLASH;
   static const CREATE_EVENT = _Paths.CREATE_EVENT;
   static const MANAGE_EVENT = _Paths.MANAGE_EVENT;
+<<<<<<< HEAD
 
+=======
+  static const EDIT_PROFILE = _Paths.EDIT_PROFILE;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+>>>>>>> 2cbffb5f42cc099641df9a224fe83b1827b6938d
 }
 
 abstract class _Paths {
@@ -34,4 +39,9 @@ abstract class _Paths {
   static const SPLASH = '/splash';
   static const CREATE_EVENT = '/create-event';
   static const MANAGE_EVENT = '/manage-event';
+<<<<<<< HEAD
+=======
+  static const EDIT_PROFILE = '/edit-profile';
+  static const NOTIFICATION = '/notification';
+>>>>>>> 2cbffb5f42cc099641df9a224fe83b1827b6938d
 }

@@ -5,6 +5,8 @@ import '../../../core/storage/storage_keys.dart';
 import '../../../widgets/custom_bottom_navbar.dart';
 import '../controllers/profile_controller.dart';
 import '../../../routes/app_pages.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import '../../../core/api/auth_api.dart';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -135,14 +137,21 @@ class ProfileView extends GetView<ProfileController> {
                               children: [
                                 // Tombol Change Password
                                 GestureDetector(
-                                  onTap: () => _showChangePasswordDialog(context),
+                                  onTap: () =>
+                                      _showChangePasswordDialog(context),
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.04, vertical: size.height * 0.012),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: size.width * 0.04,
+                                        vertical: size.height * 0.012),
                                     decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.8), // Warna merah untuk aksi sensitif
+                                      color: Colors.red.withOpacity(
+                                          0.8), // Warna merah untuk aksi sensitif
                                       borderRadius: BorderRadius.circular(30),
                                     ),
-                                    child: Text("Change Password", style: TextStyle(color: Colors.white, fontSize: size.width * 0.032)),
+                                    child: Text("Change Password",
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: size.width * 0.032)),
                                   ),
                                 ),
                                 SizedBox(width: size.width * 0.03),
@@ -153,16 +162,23 @@ class ProfileView extends GetView<ProfileController> {
                                     controller.fetchProfileData();
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: size.width * 0.05, vertical: size.height * 0.012),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: size.width * 0.05,
+                                        vertical: size.height * 0.012),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.15),
                                       borderRadius: BorderRadius.circular(30),
                                     ),
                                     child: Row(
                                       children: [
-                                        Text("Edit profile", style: TextStyle(color: Colors.white, fontSize: size.width * 0.036)),
+                                        Text("Edit profile",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: size.width * 0.036)),
                                         SizedBox(width: size.width * 0.03),
-                                        Icon(Icons.edit_outlined, color: Colors.white, size: size.width * 0.05),
+                                        Icon(Icons.edit_outlined,
+                                            color: Colors.white,
+                                            size: size.width * 0.05),
                                       ],
                                     ),
                                   ),
@@ -321,14 +337,36 @@ class ProfileView extends GetView<ProfileController> {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onPressed: () {
-                          final box = GetStorage();
-                          box.remove(StorageKeys.token);
-                          box.remove(StorageKeys.userId);
-                          box.remove(StorageKeys.username);
-                          box.remove(StorageKeys.email);
+                        onPressed: () async {
+                          try {
+                            final fcmToken =
+                                await FirebaseMessaging.instance.getToken();
 
-                          Get.offAllNamed(Routes.LOGIN);
+                            if (fcmToken != null) {
+                              await AuthApi.logout(fcmToken);
+                            }
+
+                            final box = GetStorage();
+
+                            box.remove(StorageKeys.token);
+                            box.remove(StorageKeys.userId);
+                            box.remove(StorageKeys.username);
+                            box.remove(StorageKeys.email);
+
+                            Get.offAllNamed(Routes.LOGIN);
+                          } catch (e) {
+                            print("LOGOUT ERROR: $e");
+
+                            // Still logout locally even if API fails
+                            final box = GetStorage();
+
+                            box.remove(StorageKeys.token);
+                            box.remove(StorageKeys.userId);
+                            box.remove(StorageKeys.username);
+                            box.remove(StorageKeys.email);
+
+                            Get.offAllNamed(Routes.LOGIN);
+                          }
                         },
                         icon: Icon(
                           Icons.logout,
@@ -594,6 +632,7 @@ class ProfileView extends GetView<ProfileController> {
       fit: BoxFit.cover,
     );
   }
+
   void _showChangePasswordDialog(BuildContext context) {
     Get.dialog(
       Dialog(
@@ -605,11 +644,20 @@ class ProfileView extends GetView<ProfileController> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text("Change Password",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF114B3A))),
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF114B3A))),
                 const SizedBox(height: 24),
-                _buildDialogTextField(hint: "Current Password", textController: controller.oldPassController),
-                _buildDialogTextField(hint: "New Password", textController: controller.newPassController),
-                _buildDialogTextField(hint: "Confirm New Password", textController: controller.confirmPassController),
+                _buildDialogTextField(
+                    hint: "Current Password",
+                    textController: controller.oldPassController),
+                _buildDialogTextField(
+                    hint: "New Password",
+                    textController: controller.newPassController),
+                _buildDialogTextField(
+                    hint: "Confirm New Password",
+                    textController: controller.confirmPassController),
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
@@ -617,10 +665,12 @@ class ProfileView extends GetView<ProfileController> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF114B3A),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     onPressed: () => controller.updatePassword(),
-                    child: const Text("Save Password", style: TextStyle(color: Colors.white)),
+                    child: const Text("Save Password",
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ),
               ],
@@ -630,6 +680,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
+
   // =========================================================
   // SHOW EXPERIENCE DIALOG (POP-UP ADD / EDIT)
   // =========================================================

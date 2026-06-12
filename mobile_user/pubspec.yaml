@@ -41,7 +41,13 @@ dependencies:
   cached_network_image: ^3.4.1
   flutter_svg: ^2.2.0
   get: ^4.7.3
+<<<<<<< HEAD
   image_picker: ^1.2.2
+=======
+  firebase_core: ^4.10.0
+  firebase_messaging: ^16.3.0
+  flutter_local_notifications: ^19.5.0
+>>>>>>> 2cbffb5f42cc099641df9a224fe83b1827b6938d
 
 dev_dependencies:
   flutter_test:

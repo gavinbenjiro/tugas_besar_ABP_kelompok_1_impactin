@@ -63,6 +63,13 @@ func UserRoutes(router *gin.Engine, userController *controllers.UserController) 
 		r.POST("/register", userController.Register)
 		r.POST("/login", userController.Login)
 	}
+
+	auth := router.Group("/api/user")
+	auth.Use(utils.Auth())
+	{
+		auth.POST("/fcm-token", userController.SaveFCMToken)
+		auth.POST("/logout", userController.Logout) // ADD THIS
+	}
 }
 
 func AdminRoutes(router *gin.Engine, adminController *controllers.AdminController) {
@@ -91,6 +98,31 @@ func ExperienceRoutes(router *gin.Engine, experienceController *controllers.Expe
 		r.DELETE("/:experience_id", experienceController.Delete)
 	}
 }
+func NotificationRoutes(
+	router *gin.Engine,
+	notificationController *controllers.NotificationController,
+) {
+
+	auth := router.Group("/api")
+	auth.Use(utils.Auth())
+
+	{
+		auth.GET(
+			"/notification/bell-status",
+			notificationController.GetBellStatus,
+		)
+
+		auth.PATCH(
+			"/notification",
+			notificationController.MarkBellRead,
+		)
+
+		auth.GET(
+			"/notifications",
+			notificationController.GetNotifications,
+		)
+	}
+}
 
 func SetupAllRoutes(router *gin.Engine,
 	eventController *controllers.EventController,
@@ -99,6 +131,7 @@ func SetupAllRoutes(router *gin.Engine,
 	adminController *controllers.AdminController,
 	reportController *controllers.ReportController,
 	experienceController *controllers.ExperienceController,
+	notificationController *controllers.NotificationController,
 ) {
 	EventRoutes(router, eventController)
 	UserRoutes(router, userController)
@@ -106,4 +139,5 @@ func SetupAllRoutes(router *gin.Engine,
 	AdminRoutes(router, adminController)
 	ReportRoutes(router, reportController)
 	ExperienceRoutes(router, experienceController)
+	NotificationRoutes(router, notificationController)
 }

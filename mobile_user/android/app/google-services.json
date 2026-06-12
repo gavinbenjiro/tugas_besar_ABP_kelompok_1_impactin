@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "64022804876",
+    "project_id": "impactin-d0c36",
+    "storage_bucket": "impactin-d0c36.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:64022804876:android:7d20370df6c3d339c47ea9",
+        "android_client_info": {
+          "package_name": "com.example.mobile_user"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9dFxwd6tFWShuCKi2f-Lep5gMvaynSlo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

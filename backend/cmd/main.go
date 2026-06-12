@@ -20,6 +20,7 @@ import (
 func main() {
 	// Initialize DB
 	db := config.InitDB()
+	config.InitFirebase()
 	SeedAdmin(db)
 
 	// === Repository ===
@@ -34,9 +35,20 @@ func main() {
 	expRepo := repositories.NewExperienceRepository(db)
 
 	// === Service ===
+	notificationSvc, err := services.NewNotificationService()
+	if err != nil {
+		log.Fatal(err)
+	}
 	userSvc := services.NewUserService(userRepo, profileRepo)
 	profileSvc := services.NewProfileService(profileRepo, userRepo, skillRepo, eventRepo, expRepo)
-	eventSvc := services.NewEventService(eventRepo, profileRepo, applicantRepo, participantRepo)
+	eventSvc := services.NewEventService(
+		eventRepo,
+		profileRepo,
+		applicantRepo,
+		participantRepo,
+		userRepo,
+		notificationSvc,
+	)
 	adminSvc := services.NewAdminService(adminRepo)
 	reportSvc := services.NewReportService(reportRepo, eventRepo, participantRepo, profileRepo)
 	expSvc := services.NewExperienceService(expRepo)

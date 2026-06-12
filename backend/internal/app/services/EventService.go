@@ -37,10 +37,12 @@ type EventService interface {
 }
 
 type eventService struct {
-	eventRepo       repositories.EventRepository
-	profileRepo     repositories.ProfileRepository
-	applicantRepo   repositories.ApplicantRepository
-	participantRepo repositories.ParticipantRepository
+	eventRepo           repositories.EventRepository
+	profileRepo         repositories.ProfileRepository
+	applicantRepo       repositories.ApplicantRepository
+	participantRepo     repositories.ParticipantRepository
+	userRepo            *repositories.UserRepository
+	notificationService *NotificationService
 }
 
 func NewEventService(
@@ -48,8 +50,18 @@ func NewEventService(
 	profileRepo repositories.ProfileRepository,
 	applicantRepo repositories.ApplicantRepository,
 	participantRepo repositories.ParticipantRepository,
+	userRepo *repositories.UserRepository,
+	notificationService *NotificationService,
 ) EventService {
-	return &eventService{eventRepo, profileRepo, applicantRepo, participantRepo}
+
+	return &eventService{
+		eventRepo:           eventRepo,
+		profileRepo:         profileRepo,
+		applicantRepo:       applicantRepo,
+		participantRepo:     participantRepo,
+		userRepo:            userRepo,
+		notificationService: notificationService,
+	}
 }
 
 func (s *eventService) CreateEvent(userID uint, dto request.EventRequestDto) (response.EventResponseDto, error) {
@@ -541,6 +553,33 @@ func (s *eventService) AdminEventApproval(eventID uint, action string) (response
 
 	if err := s.eventRepo.UpdateApprovalStatus(event); err != nil {
 		return response.AdminEventApprovalResponseDto{}, err
+	}
+
+	tokens, err := s.userRepo.GetFCMTokensByUserID(
+		event.UserID,
+	)
+
+	if err == nil {
+
+		title := ""
+		body := ""
+
+		if action == "accept" {
+			title = "Event Approved"
+			body = "Your event \"" + event.Title + "\" has been approved."
+		} else {
+			title = "Event Rejected"
+			body = "Your event \"" + event.Title + "\" has been rejected."
+		}
+
+		for _, token := range tokens {
+
+			_ = s.notificationService.SendToToken(
+				token,
+				title,
+				body,
+			)
+		}
 	}
 
 	return response.AdminEventApprovalResponseDto{

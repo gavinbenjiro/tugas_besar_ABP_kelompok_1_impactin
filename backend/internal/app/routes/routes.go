@@ -63,6 +63,13 @@ func UserRoutes(router *gin.Engine, userController *controllers.UserController) 
 		r.POST("/register", userController.Register)
 		r.POST("/login", userController.Login)
 	}
+
+	auth := router.Group("/api/user")
+	auth.Use(utils.Auth())
+	{
+		auth.POST("/fcm-token", userController.SaveFCMToken)
+		auth.POST("/logout", userController.Logout) // ADD THIS
+	}
 }
 
 func AdminRoutes(router *gin.Engine, adminController *controllers.AdminController) {

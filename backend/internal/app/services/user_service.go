@@ -12,13 +12,13 @@ import (
 )
 
 type UserService struct {
-	UserRepo *repositories.UserRepository
+	UserRepo    *repositories.UserRepository
 	ProfileRepo repositories.ProfileRepository
 }
 
 func NewUserService(userRepo *repositories.UserRepository, profileRepo repositories.ProfileRepository) *UserService {
 	return &UserService{
-		UserRepo: userRepo,
+		UserRepo:    userRepo,
 		ProfileRepo: profileRepo,
 	}
 }
@@ -32,7 +32,7 @@ func (s *UserService) Register(req request.RegisterRequestDto) (response.Registe
 	if s.UserRepo.IsUsernameExists(req.Username) {
 		return response.RegisterResponseDto{}, errors.New("username already exists")
 	}
-	
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return response.RegisterResponseDto{}, err
@@ -66,31 +66,47 @@ func (s *UserService) Register(req request.RegisterRequestDto) (response.Registe
 
 func (s *UserService) Login(req request.LoginRequestDto) (response.LoginResponseDto, error) {
 
-    // ambil user dengan username
-    user, err := s.UserRepo.FindByUsername(req.Username)
-    if err != nil {
-        return response.LoginResponseDto{}, errors.New("invalid username or password")
-    }
+	// ambil user dengan username
+	user, err := s.UserRepo.FindByUsername(req.Username)
+	if err != nil {
+		return response.LoginResponseDto{}, errors.New("invalid username or password")
+	}
 
-    // cek password
-    if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
-        return response.LoginResponseDto{}, errors.New("invalid username or password")
-    }
+	// cek password
+	if bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)) != nil {
+		return response.LoginResponseDto{}, errors.New("invalid username or password")
+	}
 
-    // generate JWT
-    token, err := utils.GenerateJWT(user.ID)
-    if err != nil {
-        return response.LoginResponseDto{}, err
-    }
+	// generate JWT
+	token, err := utils.GenerateJWT(user.ID)
+	if err != nil {
+		return response.LoginResponseDto{}, err
+	}
 
-    // response
-    return response.LoginResponseDto{
-        Message: "login success",
-        Token:   token,
-        Data: response.UserData{
-            ID:       user.ID,
-            Email:    user.Email,
-            Username: user.Username,
-        },
-    }, nil
+	// response
+	return response.LoginResponseDto{
+		Message: "login success",
+		Token:   token,
+		Data: response.UserData{
+			ID:       user.ID,
+			Email:    user.Email,
+			Username: user.Username,
+		},
+	}, nil
+}
+
+func (s *UserService) SaveFCMToken(
+	userID uint,
+	token string,
+) error {
+	return s.UserRepo.SaveFCMToken(
+		userID,
+		token,
+	)
+}
+
+func (s *UserService) Logout(
+	token string,
+) error {
+	return s.UserRepo.RemoveFCMToken(token)
 }

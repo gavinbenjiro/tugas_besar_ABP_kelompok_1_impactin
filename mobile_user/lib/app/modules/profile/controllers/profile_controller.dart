@@ -126,18 +126,30 @@ class ProfileController extends GetxController {
   // ==========================================
   // LOGIC: OPEN EXPERIENCE FORM DIALOG
   // ==========================================
+  var existingImageUrl = "".obs;
   void openExperienceForm({Map<String, dynamic>? exp}) {
     expImagePath.value = "";
 
     if (exp != null) {
       // Mode Edit
+      existingImageUrl.value = exp['cover_image'] ?? "";
       expTitleController.text = exp['title'] ?? '';
-      // Gunakan 'host_name' sesuai dengan yang disimpan di database
-      expHostController.text = exp['host_name'] ?? '';
+
+      // --- PERBAIKAN DI SINI ---
+      // Kita cek 'host_name' dulu, jika null, ambil 'creator'
+      expHostController.text = exp['host_name'] ?? exp['creator'] ?? '';
+
       expDescController.text = exp['description'] ?? '';
-      expDateController.text = exp['date']?.toString() ?? '';
+
+      // Sanitasi tanggal
+      String rawDate = exp['date']?.toString() ?? '';
+      if (rawDate.contains('T')) {
+        expDateController.text = rawDate.split('T')[0];
+      } else {
+        expDateController.text = rawDate;
+        existingImageUrl.value = "";
+      }
     } else {
-      // Mode Add
       expTitleController.clear();
       expHostController.clear();
       expDescController.clear();
@@ -177,28 +189,39 @@ class ProfileController extends GetxController {
       final token = box.read(StorageKeys.token);
       if (token == null) return;
 
-      String? imageUrlFromCloudinary;
+      // 1. Tentukan gambar mana yang akan dikirim
+      String? imageUrlToSend;
+
       if (expImagePath.value.isNotEmpty) {
-        imageUrlFromCloudinary = await CloudinaryApi.uploadImage(expImagePath.value);
-        if (imageUrlFromCloudinary == null) {
+        // Jika ada file baru, upload ke Cloudinary
+        imageUrlToSend = await CloudinaryApi.uploadImage(expImagePath.value);
+
+        if (imageUrlToSend == null) {
           Get.snackbar('Gagal', 'Upload gambar gagal', backgroundColor: Colors.red);
           isLoading.value = false;
           return;
         }
+      } else {
+        // Jika TIDAK ada file baru, gunakan link gambar lama (existing)
+        // Jika sebelumnya tidak ada gambar, maka hasilnya tetap null
+        imageUrlToSend = existingImageUrl.value.isNotEmpty ? existingImageUrl.value : null;
       }
 
-      // UBAH "creator" MENJADI "host_name"
+      // 2. Siapkan data body
+      String cleanDate = expDateController.text.trim();
+      if (cleanDate.contains('T')) {
+        cleanDate = cleanDate.split('T')[0];
+      }
+
       final Map<String, dynamic> requestBody = {
         "title": expTitleController.text.trim(),
         "host_name": expHostController.text.trim(),
-        "date": expDateController.text.trim(),
+        "date": cleanDate,
         "description": expDescController.text.trim(),
+        "cover_image": imageUrlToSend, // Kirim URL (baru atau lama)
       };
 
-      if (imageUrlFromCloudinary != null) {
-        requestBody["cover_image"] = imageUrlFromCloudinary;
-      }
-
+      // 3. Panggil API
       if (id == null) {
         await ProfileApi.addExperience(data: requestBody, token: token);
       } else {
@@ -208,6 +231,7 @@ class ProfileController extends GetxController {
       fetchProfileData();
       Get.back();
       Get.snackbar('Sukses', 'Experience berhasil disimpan', backgroundColor: Colors.green);
+
     } catch (e) {
       print("ERROR DETAIL: $e");
       Get.snackbar('Gagal', 'Periksa terminal untuk detail error', backgroundColor: Colors.red);

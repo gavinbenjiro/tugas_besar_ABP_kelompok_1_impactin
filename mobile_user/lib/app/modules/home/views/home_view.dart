@@ -35,7 +35,7 @@ class HomeView extends GetView<HomeController> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: width * 0.09,
+                        fontSize: width * 0.07,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -68,19 +68,19 @@ class HomeView extends GetView<HomeController> {
                             ),
                           ),
                           Obx(
-                            () => controller.hasUnreadNotification.value
+                                () => controller.hasUnreadNotification.value
                                 ? Positioned(
-                                    top: 12,
-                                    right: 14,
-                                    child: Container(
-                                      width: 10,
-                                      height: 10,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.red,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  )
+                              top: 12,
+                              right: 14,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                            )
                                 : const SizedBox(),
                           ),
                         ],
@@ -122,7 +122,7 @@ class HomeView extends GetView<HomeController> {
                           itemCount: controller.recommendedEvents.length,
                           itemBuilder: (context, index) {
                             final bannerEvent =
-                                controller.recommendedEvents[index];
+                            controller.recommendedEvents[index];
 
                             return GestureDetector(
                               onTap: () {
@@ -149,7 +149,7 @@ class HomeView extends GetView<HomeController> {
                                     bottom: 30,
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.symmetric(
@@ -158,7 +158,7 @@ class HomeView extends GetView<HomeController> {
                                           ),
                                           decoration: BoxDecoration(
                                             color:
-                                                Colors.white.withOpacity(0.25),
+                                            Colors.white.withOpacity(0.25),
                                             borderRadius: BorderRadius.circular(
                                               18,
                                             ),
@@ -207,7 +207,7 @@ class HomeView extends GetView<HomeController> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(
                             controller.recommendedEvents.length,
-                            (index) {
+                                (index) {
                               final active =
                                   controller.currentBannerIndex.value == index;
 
@@ -241,15 +241,20 @@ class HomeView extends GetView<HomeController> {
                   Text(
                     'Categories',
                     style: TextStyle(
-                      fontSize: width * 0.08,
+                      fontSize: width * 0.05,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
-                    'See all',
-                    style: TextStyle(
-                      color: Colors.teal.shade700,
-                      fontWeight: FontWeight.w600,
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed(Routes.SEARCH_EVENT);
+                    },
+                    child: Text(
+                      'See all',
+                      style: TextStyle(
+                        color: Colors.teal.shade700,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -257,44 +262,50 @@ class HomeView extends GetView<HomeController> {
 
               const SizedBox(height: 18),
 
-              // CATEGORY LIST
+              // ==========================================
+              // CATEGORY LIST (Sudah Dirapikan)
+              // ==========================================
               Obx(
-                () => SizedBox(
-                  height: 50,
+                    () => SizedBox(
+                  height: 45, // Diubah ke 45 agar bentuk lonjong (pill) lebih proporsional
                   child: ListView(
                     scrollDirection: Axis.horizontal,
                     children: [
                       CustomCategoryChip(
-                        title: 'All',
+                        title: '  All  ', // Ditambah spasi agar tidak berbentuk lingkaran sempurna
                         isSelected: controller.selectedCategory.value == 'All',
                         onTap: () => controller.changeCategory('All'),
                       ),
+                      const SizedBox(width: 3), // Jarak simetris antar chip
                       CustomCategoryChip(
                         title: 'Environment',
                         isSelected:
-                            controller.selectedCategory.value == 'Environment',
+                        controller.selectedCategory.value == 'Environment',
                         onTap: () => controller.changeCategory(
                           'Environment',
                         ),
                       ),
+                      const SizedBox(width: 3),
                       CustomCategoryChip(
                         title: 'Education',
                         isSelected:
-                            controller.selectedCategory.value == 'Education',
+                        controller.selectedCategory.value == 'Education',
                         onTap: () => controller.changeCategory(
                           'Education',
                         ),
                       ),
+                      const SizedBox(width: 3),
                       CustomCategoryChip(
                         title: 'Health',
                         isSelected:
-                            controller.selectedCategory.value == 'Health',
+                        controller.selectedCategory.value == 'Health',
                         onTap: () => controller.changeCategory('Health'),
                       ),
+                      const SizedBox(width: 3),
                       CustomCategoryChip(
                         title: 'Community',
                         isSelected:
-                            controller.selectedCategory.value == 'Community',
+                        controller.selectedCategory.value == 'Community',
                         onTap: () => controller.changeCategory(
                           'Community',
                         ),
@@ -308,8 +319,8 @@ class HomeView extends GetView<HomeController> {
 
               // EVENTS
               Obx(
-                () => ListView.builder(
-                  itemCount: controller.events.length,
+                    () => ListView.builder(
+                  itemCount: controller.events.length > 5 ? 5 : controller.events.length,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemBuilder: (context, index) {

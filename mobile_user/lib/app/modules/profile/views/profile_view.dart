@@ -7,6 +7,7 @@ import '../controllers/profile_controller.dart';
 import '../../../routes/app_pages.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../core/api/auth_api.dart';
+import 'dart:io';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -20,6 +21,8 @@ class ProfileView extends GetView<ProfileController> {
       body: SafeArea(
         // Obx mendengarkan perubahan status loading & data di controller
         child: Obx(() {
+          bool isLocal = controller.expImagePath.value.isNotEmpty;
+          bool isExisting = controller.existingImageUrl.value.isNotEmpty;
           if (controller.isLoading.value) {
             return const Center(
               child: CircularProgressIndicator(
@@ -607,15 +610,7 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ],
                 ),
-                SizedBox(height: size.height * 0.015),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: size.width * 0.034,
-                    height: 1.5,
-                  ),
-                ),
+                // Kode "SizedBox" dan "Text" deskripsi yang berada di sini sebelumnya telah dihapus.
               ],
             ),
           ),
@@ -753,54 +748,59 @@ class ProfileView extends GetView<ProfileController> {
                 ),
 
                 // Add Image Button (Placeholder)
+
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Obx(() => GestureDetector(
-                    onTap: () => controller.pickExperienceImage(), // Menghubungkan ke controller
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: controller.expImagePath.value.isEmpty
-                              ? Colors.grey.shade300
-                              : Colors.green.shade600, // Border hijau saat gambar terpilih
+                  child: Obx(() {
+                    // Definisi reaktif di dalam Obx
+                    final String imagePath = controller.expImagePath.value;
+                    final String existingUrl =
+                        controller.existingImageUrl.value;
+
+                    // Logika tampil:
+                    // Jika ada file lokal (baru dipilih), pakai file
+                    // Jika tidak, cek apakah ada URL lama (edit mode), pakai network
+                    bool hasImage =
+                        imagePath.isNotEmpty || existingUrl.isNotEmpty;
+
+                    return GestureDetector(
+                      onTap: () => controller.pickExperienceImage(),
+                      child: Container(
+                        width: double.infinity,
+                        height: 180, // Beri tinggi tetap agar preview terlihat
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: hasImage
+                                ? Colors.green.shade600
+                                : Colors.grey.shade300,
+                            width: 2,
+                          ),
                         ),
-                        borderRadius: BorderRadius.circular(8),
-                        color: controller.expImagePath.value.isEmpty
-                            ? Colors.transparent
-                            : Colors.green.shade50, // Background hijau muda saat gambar terpilih
+                        child: hasImage
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: imagePath.isNotEmpty
+                                    ? Image.file(File(imagePath),
+                                        fit: BoxFit.cover) // Preview file baru
+                                    : Image.network(existingUrl,
+                                        fit: BoxFit.cover), // Preview foto lama
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_photo_alternate,
+                                      size: 40, color: Colors.grey.shade400),
+                                  const SizedBox(height: 8),
+                                  Text("Add cover image",
+                                      style: TextStyle(
+                                          color: Colors.grey.shade600)),
+                                ],
+                              ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            controller.expImagePath.value.isEmpty
-                                ? Icons.upload_file
-                                : Icons.check_circle,
-                            size: 18,
-                            color: controller.expImagePath.value.isEmpty
-                                ? Colors.grey.shade600
-                                : Colors.green.shade800,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            controller.expImagePath.value.isEmpty
-                                ? "Add cover image"
-                                : "Image selected",
-                            style: TextStyle(
-                              color: controller.expImagePath.value.isEmpty
-                                  ? Colors.grey.shade600
-                                  : Colors.green.shade800,
-                              fontSize: 14,
-                              fontWeight: controller.expImagePath.value.isEmpty
-                                  ? FontWeight.normal
-                                  : FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )),
+                    );
+                  }),
                 ),
 
                 // Description Field
@@ -846,6 +846,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
+
 // =========================================================
   // SHOW DELETE CONFIRMATION DIALOG
   // =========================================================
@@ -867,7 +868,8 @@ class ProfileView extends GetView<ProfileController> {
                   color: Colors.red.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.warning_amber_rounded, color: Colors.red.shade400, size: 40),
+                child: Icon(Icons.warning_amber_rounded,
+                    color: Colors.red.shade400, size: 40),
               ),
               const SizedBox(height: 24),
 
@@ -899,11 +901,15 @@ class ProfileView extends GetView<ProfileController> {
                     child: OutlinedButton(
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(color: Colors.grey.shade300),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                       ),
                       onPressed: () => Get.back(), // Tutup dialog
-                      child: Text("Cancel", style: TextStyle(color: Colors.grey.shade700, fontWeight: FontWeight.w600)),
+                      child: Text("Cancel",
+                          style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -911,7 +917,8 @@ class ProfileView extends GetView<ProfileController> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red.shade500,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         elevation: 0,
                       ),
@@ -920,7 +927,10 @@ class ProfileView extends GetView<ProfileController> {
                         // Panggil fungsi hapus dari controller
                         controller.deleteExperience(expId);
                       },
-                      child: const Text("Delete", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                      child: const Text("Delete",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -931,6 +941,7 @@ class ProfileView extends GetView<ProfileController> {
       ),
     );
   }
+
   // Helper Custom TextField untuk Dialog UI
   Widget _buildDialogTextField({
     required String hint,

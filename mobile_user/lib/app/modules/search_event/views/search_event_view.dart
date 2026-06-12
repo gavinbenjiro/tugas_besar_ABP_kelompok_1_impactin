@@ -10,6 +10,9 @@ class SearchEventView extends GetView<SearchEventController> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width_size = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F9),
       bottomNavigationBar: const CustomBottomNavbar(
@@ -18,86 +21,114 @@ class SearchEventView extends GetView<SearchEventController> {
       body: SafeArea(
         child: Column(
           children: [
+            // =================================================
             // HEADER
-            Container(
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                20,
-                20,
-                28,
-              ),
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(32),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF4F6F68),
-                    Color(0xFF0B5D51),
-                  ],
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Find Events",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+            // =================================================
+            Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF114B3A),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(32),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    "Discover volunteer opportunities",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: controller.searchController,
-                    decoration: InputDecoration(
-                      hintText: "Search event, location, host...",
-                      filled: true,
-                      fillColor: Colors.white,
-                      prefixIcon: const Icon(
-                        Icons.search,
-                      ),
-                      suffixIcon: Obx(
-                        () => controller.searchText.value.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.close),
-                                onPressed: () {
-                                  controller.searchController.clear();
-                                  controller.searchText.value = '';
-                                  controller.fetchEvents();
-                                },
-                              )
-                            : const SizedBox.shrink(),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(
-                          18,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // HAPUS kata 'const' di sini agar width_size bisa dipakai
+                      Text(
+                        "Find Events",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width_size * 0.08, // Disesuaikan agar lebih proporsional
+                          fontWeight: FontWeight.bold,
                         ),
-                        borderSide: BorderSide.none,
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        "Discover volunteer opportunities",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      TextField(
+                        controller: controller.searchController,
+                        decoration: InputDecoration(
+                          hintText: "Search event, location, host...",
+                          filled: true,
+                          fillColor: Colors.white,
+                          prefixIcon: const Icon(
+                            Icons.search,
+                          ),
+                          suffixIcon: Obx(
+                                () => controller.searchText.value.isNotEmpty
+                                ? IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                controller.searchController.clear();
+                                controller.searchText.value = '';
+                                controller.fetchEvents();
+                              },
+                            )
+                                : const SizedBox.shrink(),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        onChanged: (_) {
+                          controller.fetchEvents();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                // =============================================
+                // GREEN WAVES
+                // =============================================
+                Positioned(
+                  top: -40,
+                  left: -20,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: size.width * 0.9,
+                      height: size.height * 0.16,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(100),
                       ),
                     ),
-                    onChanged: (_) {
-                      controller.fetchEvents();
-                    },
                   ),
-                ],
-              ),
+                ),
+                Positioned(
+                  top: -20,
+                  right: -40,
+                  child: IgnorePointer(
+                    child: Container(
+                      width: size.width * 0.8,
+                      height: size.height * 0.13,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 16),
 
+            // =================================================
             // FILTERS
+            // =================================================
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
@@ -106,16 +137,16 @@ class SearchEventView extends GetView<SearchEventController> {
                 children: [
                   Expanded(
                     child: Obx(
-                      () => OutlinedButton.icon(
+                          () => OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(
                             double.infinity,
                             56,
                           ),
                           backgroundColor:
-                              controller.selectedCategory.value != 'All'
-                                  ? const Color(0xFFE7F3EF)
-                                  : Colors.white,
+                          controller.selectedCategory.value != 'All'
+                              ? const Color(0xFFE7F3EF)
+                              : Colors.white,
                           side: BorderSide(
                             color: controller.selectedCategory.value != 'All'
                                 ? const Color(0xFF0B5D51)
@@ -155,7 +186,7 @@ class SearchEventView extends GetView<SearchEventController> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Obx(
-                      () => OutlinedButton.icon(
+                          () => OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           minimumSize: const Size(
                             double.infinity,
@@ -206,13 +237,15 @@ class SearchEventView extends GetView<SearchEventController> {
 
             const SizedBox(height: 10),
 
+            // =================================================
             // ACTIVE FILTERS
+            // =================================================
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
               ),
               child: Obx(
-                () {
+                    () {
                   final hasFilters =
                       controller.selectedCategory.value != 'All' ||
                           controller.selectedAges.isNotEmpty;
@@ -245,7 +278,7 @@ class SearchEventView extends GetView<SearchEventController> {
                             },
                           ),
                         ...controller.selectedAges.map(
-                          (age) => Chip(
+                              (age) => Chip(
                             label: Text(
                               age,
                               style: TextStyle(
@@ -278,13 +311,15 @@ class SearchEventView extends GetView<SearchEventController> {
 
             const SizedBox(height: 8),
 
+            // =================================================
             // EVENT COUNT
+            // =================================================
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16,
               ),
               child: Obx(
-                () => Align(
+                    () => Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     "${controller.events.length} Events Found",
@@ -299,13 +334,15 @@ class SearchEventView extends GetView<SearchEventController> {
 
             const SizedBox(height: 8),
 
+            // =================================================
             // EVENTS
+            // =================================================
             Expanded(
               child: Obx(
-                () {
+                    () {
                   if (controller.isLoading.value) {
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(color: Color(0xFF114B3A)),
                     );
                   }
 
@@ -334,6 +371,7 @@ class SearchEventView extends GetView<SearchEventController> {
 
                   return RefreshIndicator(
                     onRefresh: controller.fetchEvents,
+                    color: const Color(0xFF114B3A),
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
                       itemCount: controller.events.length,
@@ -354,19 +392,12 @@ class SearchEventView extends GetView<SearchEventController> {
                             padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                28,
-                              ),
+                              borderRadius: BorderRadius.circular(28),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(
-                                    0.06,
-                                  ),
+                                  color: Colors.black.withOpacity(0.06),
                                   blurRadius: 12,
-                                  offset: const Offset(
-                                    0,
-                                    4,
-                                  ),
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
@@ -375,9 +406,7 @@ class SearchEventView extends GetView<SearchEventController> {
                                 Stack(
                                   children: [
                                     ClipRRect(
-                                      borderRadius: BorderRadius.circular(
-                                        20,
-                                      ),
+                                      borderRadius: BorderRadius.circular(20),
                                       child: Image.network(
                                         event.coverImage,
                                         width: 120,
@@ -402,13 +431,9 @@ class SearchEventView extends GetView<SearchEventController> {
                                           vertical: 8,
                                         ),
                                         decoration: const BoxDecoration(
-                                          color: Color(
-                                            0xFF0B5D51,
-                                          ),
+                                          color: Color(0xFF0B5D51),
                                           borderRadius: BorderRadius.vertical(
-                                            bottom: Radius.circular(
-                                              20,
-                                            ),
+                                            bottom: Radius.circular(20),
                                           ),
                                         ),
                                         child: Text(
@@ -424,15 +449,12 @@ class SearchEventView extends GetView<SearchEventController> {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(
-                                  width: 18,
-                                ),
+                                const SizedBox(width: 18),
                                 Expanded(
                                   child: SizedBox(
                                     height: 120,
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           event.title,
@@ -477,9 +499,7 @@ class SearchEventView extends GetView<SearchEventController> {
                                             const SizedBox(width: 6),
                                             Expanded(
                                               child: Text(
-                                                event.startDate
-                                                    .split('T')
-                                                    .first,
+                                                event.startDate.split('T').first,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: TextStyle(
                                                   color: Colors.grey.shade600,
@@ -530,10 +550,13 @@ class SearchEventView extends GetView<SearchEventController> {
     );
   }
 
+  // =================================================
+  // BOTTOM SHEET FILTERS
+  // =================================================
   void showCategoryFilter(
-    BuildContext context,
-    SearchEventController controller,
-  ) {
+      BuildContext context,
+      SearchEventController controller,
+      ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
@@ -592,21 +615,13 @@ class SearchEventView extends GetView<SearchEventController> {
                       ),
                       decoration: BoxDecoration(
                         color: selected
-                            ? const Color(
-                                0xFF0B5D51,
-                              )
-                            : const Color(
-                                0xFFF3F7F5,
-                              ),
+                            ? const Color(0xFF0B5D51)
+                            : const Color(0xFFF3F7F5),
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: selected
-                              ? const Color(
-                                  0xFF0B5D51,
-                                )
-                              : const Color(
-                                  0xFFD7E7E1,
-                                ),
+                              ? const Color(0xFF0B5D51)
+                              : const Color(0xFFD7E7E1),
                         ),
                       ),
                       child: Text(
@@ -614,9 +629,7 @@ class SearchEventView extends GetView<SearchEventController> {
                         style: TextStyle(
                           color: selected
                               ? Colors.white
-                              : const Color(
-                                  0xFF0B5D51,
-                                ),
+                              : const Color(0xFF0B5D51),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -633,10 +646,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     style: OutlinedButton.styleFrom(
                       backgroundColor: const Color(0xFFE7F3EF),
                       foregroundColor: const Color(0xFF0B5D51),
-                      minimumSize: const Size(
-                        double.infinity,
-                        54,
-                      ),
+                      minimumSize: const Size(double.infinity, 54),
                       side: BorderSide.none,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
@@ -647,9 +657,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     },
                     child: const Text(
                       'Clear',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -659,10 +667,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0B5D51),
                       foregroundColor: Colors.white,
-                      minimumSize: const Size(
-                        double.infinity,
-                        54,
-                      ),
+                      minimumSize: const Size(double.infinity, 54),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -674,9 +679,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     },
                     child: const Text(
                       'Apply',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -689,9 +692,9 @@ class SearchEventView extends GetView<SearchEventController> {
   }
 
   void showAgeFilter(
-    BuildContext context,
-    SearchEventController controller,
-  ) {
+      BuildContext context,
+      SearchEventController controller,
+      ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
@@ -726,15 +729,13 @@ class SearchEventView extends GetView<SearchEventController> {
                 const SizedBox(height: 6),
                 const Text(
                   'Choose one or more age groups',
-                  style: TextStyle(
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(color: Colors.grey),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Obx(
-              () => Wrap(
+                  () => Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: controller.ageRanges.map((age) {
@@ -749,9 +750,7 @@ class SearchEventView extends GetView<SearchEventController> {
                       }
                     },
                     child: AnimatedContainer(
-                      duration: const Duration(
-                        milliseconds: 200,
-                      ),
+                      duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 16,
@@ -800,14 +799,9 @@ class SearchEventView extends GetView<SearchEventController> {
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
-                      minimumSize: const Size(
-                        double.infinity,
-                        54,
-                      ),
+                      minimumSize: const Size(double.infinity, 54),
                       foregroundColor: const Color(0xFF0B5D51),
-                      side: const BorderSide(
-                        color: Color(0xFF0B5D51),
-                      ),
+                      side: const BorderSide(color: Color(0xFF0B5D51)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -815,9 +809,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     onPressed: () {
                       controller.selectedAges.clear();
                     },
-                    child: const Text(
-                      'Clear',
-                    ),
+                    child: const Text('Clear'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -826,10 +818,7 @@ class SearchEventView extends GetView<SearchEventController> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0B5D51),
                       foregroundColor: Colors.white,
-                      minimumSize: const Size(
-                        double.infinity,
-                        54,
-                      ),
+                      minimumSize: const Size(double.infinity, 54),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -839,9 +828,7 @@ class SearchEventView extends GetView<SearchEventController> {
                       controller.fetchEvents();
                       Get.back();
                     },
-                    child: const Text(
-                      'Apply',
-                    ),
+                    child: const Text('Apply'),
                   ),
                 ),
               ],

@@ -8,53 +8,106 @@ class NotificationView extends GetView<NotificationController> {
 
   @override
   Widget build(BuildContext context) {
+    // Tambahkan variabel size untuk ukuran waves
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       body: Column(
         children: [
           // ==========================================
-          // HEADER
+          // HEADER (Menggunakan style Back Button dari EventDetailView)
           // ==========================================
-          Container(
-            width: double.infinity,
-            height: 180,
-            decoration: const BoxDecoration(
-              color: Color(0xFF0B5D51),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(40),
-                bottomRight: Radius.circular(40),
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 20,
+          Stack(
+            children: [
+              Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF114B3A), // Warna Profile
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(40),
+                    bottomRight: Radius.circular(40),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: const [
-                    Text(
-                      "Notifications",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 30),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // BACK BUTTON (UI disamakan dengan EventDetailView)
+                        GestureDetector(
+                          onTap: () => Get.back(),
+                          child: Container(
+                            width: 42,
+                            height: 42,
+                            decoration: const BoxDecoration(
+                              color: Colors.white, // Lingkaran Putih murni
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back_ios_new, // Ikon iOS style
+                              size: 18,
+                              color: Colors.black87, // Warna ikon gelap agar kontras di atas putih
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        const Text(
+                          "Notifications",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          "Stay updated with your events",
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
                     ),
-                    SizedBox(height: 6),
-                    Text(
-                      "Stay updated with your events",
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+
+              // =============================================
+              // GREEN WAVES
+              // =============================================
+              Positioned(
+                top: -40,
+                left: -20,
+                child: IgnorePointer(
+                  child: Container(
+                    width: size.width * 0.9,
+                    height: size.height * 0.16,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -20,
+                right: -40,
+                child: IgnorePointer(
+                  child: Container(
+                    width: size.width * 0.8,
+                    height: size.height * 0.13,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.04),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
 
           // ==========================================
@@ -62,11 +115,11 @@ class NotificationView extends GetView<NotificationController> {
           // ==========================================
           Expanded(
             child: Obx(
-              () {
+                  () {
                 if (controller.isLoading.value) {
                   return const Center(
                     child: CircularProgressIndicator(
-                      color: Color(0xFF0B5D51),
+                      color: Color(0xFF114B3A), // Disamakan dengan tema utama
                     ),
                   );
                 }
@@ -107,14 +160,14 @@ class NotificationView extends GetView<NotificationController> {
                   padding: const EdgeInsets.all(20),
                   itemCount: controller.notifications.length,
                   itemBuilder: (
-                    context,
-                    index,
-                  ) {
+                      context,
+                      index,
+                      ) {
                     final notif = controller.notifications[index];
 
                     final isApproved = notif.title.toLowerCase().contains(
-                          "approved",
-                        );
+                      "approved",
+                    );
 
                     return Container(
                       margin: const EdgeInsets.only(
@@ -197,9 +250,9 @@ class NotificationView extends GetView<NotificationController> {
                                     ),
                                     Text(
                                       notif.createdAt.toString().substring(
-                                            0,
-                                            16,
-                                          ),
+                                        0,
+                                        16,
+                                      ),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey.shade500,

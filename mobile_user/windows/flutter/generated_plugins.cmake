@@ -3,19 +3,13 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-<<<<<<< HEAD
   file_selector_windows
-)
-
-list(APPEND FLUTTER_FFI_PLUGIN_LIST
-  jni
-=======
   firebase_core
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   flutter_local_notifications_windows
->>>>>>> 2cbffb5f42cc099641df9a224fe83b1827b6938d
+  jni
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

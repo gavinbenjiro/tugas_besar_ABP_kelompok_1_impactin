@@ -1,12 +1,7 @@
-// =========================================================
-// IMPROVED YOUR EVENT VIEW
-// CLEAN UI LIKE SLICING
-// =========================================================
-
 import 'package:flutter/material.dart';
-import '../../../routes/app_pages.dart';
 import 'package:get/get.dart';
 
+import '../../../routes/app_pages.dart';
 import '../../../widgets/custom_bottom_navbar.dart';
 import '../../../widgets/your_event_card.dart';
 import '../controllers/your_event_controller.dart';
@@ -81,16 +76,34 @@ class YourEventView extends GetView<YourEventController> {
                           ),
                         ),
                       ),
+                      // =================================================
+                      // TITLE & SUBTITLE
+                      // =================================================
                       Positioned(
                         left: size.width * 0.05,
-                        bottom: size.height * 0.03,
-                        child: Text(
-                          "Your Events",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size.width * 0.075,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        bottom: size.height * 0.025, // Sedikit dinaikkan agar pas
+                        width: size.width * 0.9, // Membatasi lebar agar text bisa wrap
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Your Events",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: size.width * 0.075,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Track the events you've joined and the impact you've made.",
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: size.width * 0.033,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -99,135 +112,216 @@ class YourEventView extends GetView<YourEventController> {
                   SizedBox(height: size.height * 0.018),
 
                   // =================================================
-                  // TABS + FILTER
+                  // CUSTOM TABS (JOINED & CREATED) + FILTER BUTTON
                   // =================================================
                   Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: size.width * 0.025,
+                      horizontal: size.width * 0.04,
                     ),
                     child: Row(
                       children: [
                         Expanded(
-                          child: SizedBox(
-                            height: size.height * 0.05,
-                            child: TabBar(
-                              dividerColor: Colors.transparent,
-                              indicatorSize: TabBarIndicatorSize.tab,
-                              indicator: BoxDecoration(
-                                color: const Color(0xFF114B3A),
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              labelColor: Colors.white,
-                              unselectedLabelColor: Colors.grey,
-                              labelStyle: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: size.width * 0.038,
-                              ),
-                              tabs: const [
-                                Tab(text: "Joined"),
-                                Tab(text: "Created"),
-                              ],
-                            ),
+                          flex: 11,
+                          child: AnimatedBuilder(
+                            animation: tabController,
+                            builder: (context, _) {
+                              final isJoinedTab = tabController.index == 0;
+                              final isCreatedTab = tabController.index == 1;
+
+                              return Row(
+                                children: [
+                                  // Tombol Joined
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                                        minimumSize: Size(double.infinity, size.height * 0.05),
+                                        backgroundColor: isJoinedTab ? const Color(0xFFE7F3EF) : Colors.white,
+                                        side: BorderSide(
+                                          color: isJoinedTab ? const Color(0xFF0B5D51) : Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                      ),
+                                      onPressed: () => tabController.animateTo(0),
+                                      child: Text(
+                                        "Joined",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                          color: isJoinedTab ? const Color(0xFF0B5D51) : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  // Tombol Created
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                                        minimumSize: Size(double.infinity, size.height * 0.05),
+                                        backgroundColor: isCreatedTab ? const Color(0xFFE7F3EF) : Colors.white,
+                                        side: BorderSide(
+                                          color: isCreatedTab ? const Color(0xFF0B5D51) : Colors.grey.shade300,
+                                          width: 1.5,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(14),
+                                        ),
+                                      ),
+                                      onPressed: () => tabController.animateTo(1),
+                                      child: Text(
+                                        "Created",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13,
+                                          color: isCreatedTab ? const Color(0xFF0B5D51) : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
 
-                        SizedBox(width: size.width * 0.025),
+                        SizedBox(width: size.width * 0.02),
 
-                        // =================================================
-                        // FILTER
-                        // =================================================
-                        Container(
-                          height: size.height * 0.05,
-                          width: size.width * 0.34,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: size.width * 0.03,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Colors.grey.shade300,
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                        // CUSTOM OUTLINED FILTER BUTTON
+                        Expanded(
+                          flex: 7,
                           child: AnimatedBuilder(
                             animation: tabController,
                             builder: (_, __) {
                               final isJoinedTab = tabController.index == 0;
 
-                              return Obx(
-                                () => DropdownButtonHideUnderline(
-                                  child: DropdownButton<String>(
-                                    isExpanded: true,
-                                    value: isJoinedTab
-                                        ? controller.selectedJoinedStatus.value
-                                        : controller
-                                            .selectedCreatedStatus.value,
-                                    items: isJoinedTab
-                                        ? const [
-                                            DropdownMenuItem(
-                                              value: 'all',
-                                              child: Text('All'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'ongoing',
-                                              child: Text('Ongoing'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'upcoming',
-                                              child: Text('Upcoming'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'completed',
-                                              child: Text('Completed'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'cancelled',
-                                              child: Text('Cancelled'),
-                                            ),
-                                          ]
-                                        : const [
-                                            DropdownMenuItem(
-                                              value: 'all',
-                                              child: Text('All'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'pending',
-                                              child: Text('Pending'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'approved',
-                                              child: Text('Approved'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'declined',
-                                              child: Text('Declined'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'completed',
-                                              child: Text('Completed'),
-                                            ),
-                                            DropdownMenuItem(
-                                              value: 'cancelled',
-                                              child: Text('Cancelled'),
-                                            ),
-                                          ],
-                                    onChanged: (value) {
-                                      if (value == null) return;
+                              return Obx(() {
+                                final selectedStatus = isJoinedTab
+                                    ? controller.selectedJoinedStatus.value
+                                    : controller.selectedCreatedStatus.value;
+                                final isFiltered = selectedStatus != 'all';
 
-                                      if (isJoinedTab) {
-                                        controller.changeJoinedStatus(value);
-                                      } else {
-                                        controller.changeCreatedStatus(value);
-                                      }
-                                    },
+                                return OutlinedButton.icon(
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    minimumSize: Size(double.infinity, size.height * 0.05),
+                                    backgroundColor: isFiltered
+                                        ? const Color(0xFFE7F3EF)
+                                        : Colors.white,
+                                    side: BorderSide(
+                                      color: isFiltered
+                                          ? const Color(0xFF0B5D51)
+                                          : Colors.grey.shade300,
+                                      width: 1.5,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
                                   ),
-                                ),
-                              );
+                                  icon: Icon(
+                                    Icons.filter_list,
+                                    size: 16,
+                                    color: isFiltered
+                                        ? const Color(0xFF0B5D51)
+                                        : Colors.grey.shade600,
+                                  ),
+                                  label: Text(
+                                    isFiltered
+                                        ? _capitalize(selectedStatus)
+                                        : 'Status',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: isFiltered
+                                          ? const Color(0xFF0B5D51)
+                                          : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                  onPressed: () {
+                                    _showStatusFilter(context, controller, isJoinedTab);
+                                  },
+                                );
+                              });
                             },
                           ),
                         ),
                       ],
                     ),
+                  ),
+
+                  SizedBox(height: size.height * 0.01),
+
+                  // =================================================
+                  // ACTIVE FILTERS (CHIPS)
+                  // =================================================
+                  AnimatedBuilder(
+                    animation: tabController,
+                    builder: (_, __) {
+                      final isJoinedTab = tabController.index == 0;
+
+                      return Obx(() {
+                        final selectedStatus = isJoinedTab
+                            ? controller.selectedJoinedStatus.value
+                            : controller.selectedCreatedStatus.value;
+
+                        if (selectedStatus == 'all') {
+                          return const SizedBox();
+                        }
+
+                        return Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: size.width * 0.04,
+                            vertical: 4,
+                          ),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: [
+                                Chip(
+                                  label: Text(
+                                    _capitalize(selectedStatus),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF0B5D51),
+                                    ),
+                                  ),
+                                  deleteIcon: const Icon(Icons.close, size: 18),
+                                  onDeleted: () {
+                                    if (isJoinedTab) {
+                                      controller.changeJoinedStatus('all');
+                                    } else {
+                                      controller.changeCreatedStatus('all');
+                                    }
+                                  },
+                                ),
+                                ActionChip(
+                                  backgroundColor: Colors.red.shade50,
+                                  label: const Text(
+                                    "Clear All",
+                                    style: TextStyle(color: Colors.red),
+                                  ),
+                                  onPressed: () {
+                                    if (isJoinedTab) {
+                                      controller.changeJoinedStatus('all');
+                                    } else {
+                                      controller.changeCreatedStatus('all');
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      });
+                    },
                   ),
 
                   SizedBox(height: size.height * 0.01),
@@ -277,14 +371,12 @@ class YourEventView extends GetView<YourEventController> {
                             ),
                             itemCount: controller.createdEvents.length,
                             itemBuilder: (context, index) {
+                              final event = controller.createdEvents[index];
                               return YourEventCard(
-                                event: controller.createdEvents[index],
-                                showManageButton: controller
-                                            .createdEvents[index].status ==
-                                        "approved" &&
-                                    controller.createdEvents[index].subStatus !=
-                                        "cancelled" && controller.createdEvents[index].subStatus !=
-                                    "completed",
+                                event: event,
+                                showManageButton: event.status == "approved" &&
+                                    event.subStatus != "cancelled" &&
+                                    event.subStatus != "completed",
                               );
                             },
                           );
@@ -322,5 +414,181 @@ class YourEventView extends GetView<YourEventController> {
         },
       ),
     );
+  }
+
+  // =================================================
+  // BOTTOM SHEET SELECTOR (FIXED OVERFLOW & GETX ERROR)
+  // =================================================
+  void _showStatusFilter(
+      BuildContext context,
+      YourEventController controller,
+      bool isJoinedTab,
+      ) {
+    final List<String> statuses = isJoinedTab
+        ? ['all', 'ongoing', 'upcoming', 'completed', 'cancelled']
+        : ['all', 'pending', 'approved', 'declined', 'completed', 'cancelled'];
+
+    String tempSelected = isJoinedTab
+        ? controller.selectedJoinedStatus.value
+        : controller.selectedCreatedStatus.value;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      const Text(
+                        "Select Status",
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0B5D51),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 2.8,
+                        ),
+                        itemCount: statuses.length,
+                        itemBuilder: (context, index) {
+                          final status = statuses[index];
+                          final isSelected = tempSelected == status;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                tempSelected = status;
+                              });
+                            },
+                            child: Container(
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFF0F7F4)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF0B5D51)
+                                      : Colors.grey.shade200,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Text(
+                                _capitalize(status),
+                                style: TextStyle(
+                                  color: isSelected
+                                      ? const Color(0xFF0B5D51)
+                                      : Colors.grey.shade700,
+                                  fontWeight:
+                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 54),
+                                backgroundColor: const Color(0xFFF0F7F4),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  tempSelected = 'all';
+                                });
+                              },
+                              child: const Text(
+                                "Clear",
+                                style: TextStyle(
+                                  color: Color(0xFF0B5D51),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                minimumSize: const Size(double.infinity, 54),
+                                backgroundColor: const Color(0xFF0B5D51),
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              onPressed: () {
+                                if (isJoinedTab) {
+                                  controller.changeJoinedStatus(tempSelected);
+                                } else {
+                                  controller.changeCreatedStatus(tempSelected);
+                                }
+                                Get.back();
+                              },
+                              child: const Text(
+                                "Apply",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }

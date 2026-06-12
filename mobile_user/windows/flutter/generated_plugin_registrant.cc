@@ -6,17 +6,12 @@
 
 #include "generated_plugin_registrant.h"
 
-<<<<<<< HEAD
 #include <file_selector_windows/file_selector_windows.h>
+#include <firebase_core/firebase_core_plugin_c_api.h>
 
 void RegisterPlugins(flutter::PluginRegistry* registry) {
   FileSelectorWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FileSelectorWindows"));
-=======
-#include <firebase_core/firebase_core_plugin_c_api.h>
-
-void RegisterPlugins(flutter::PluginRegistry* registry) {
   FirebaseCorePluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
->>>>>>> 2cbffb5f42cc099641df9a224fe83b1827b6938d
 }

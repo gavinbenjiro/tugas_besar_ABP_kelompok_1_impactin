@@ -45,4 +45,5 @@ class ApiEndpoints {
   static const getNotifications = "/notifications";
   static const bellStatus = "/notification/bell-status";
   static const markBellRead = "/notification";
+  static const getNearbyEvents = "/user/events/nearby";
 }

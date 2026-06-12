@@ -46,7 +46,8 @@ class CreateEventController extends GetxController {
   final isLoading = false.obs;
 
   final selectedCategory = ''.obs;
-
+  final RxnDouble latitude = RxnDouble();
+  final RxnDouble longitude = RxnDouble();
   final categories = [
     'Environment',
     'Health',
@@ -88,6 +89,8 @@ class CreateEventController extends GetxController {
             ) ??
             0,
         "group_link": groupLinkController.text.trim(),
+        "latitude": latitude.value,
+        "longitude": longitude.value,
       };
 
       final response = await EventApi.createEvent(

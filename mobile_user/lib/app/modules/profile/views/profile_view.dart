@@ -704,7 +704,6 @@ class ProfileView extends GetView<ProfileController> {
                 // Add Image Button (Placeholder)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-<<<<<<< HEAD
                   child: Obx(() => GestureDetector(
                     onTap: () => controller.pickExperienceImage(), // Menghubungkan ke controller
                     child: Container(
@@ -751,27 +750,6 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ),
                   )),
-=======
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.upload_file,
-                            size: 18, color: Colors.grey.shade600),
-                        const SizedBox(width: 8),
-                        Text("add image",
-                            style: TextStyle(
-                                color: Colors.grey.shade600, fontSize: 14)),
-                      ],
-                    ),
-                  ),
->>>>>>> aa520cb01b6023f399a89eb4a45fde478b62b7c3
                 ),
 
                 // Description Field

@@ -95,11 +95,11 @@ class AppPages {
       binding: TesBinding(),
     ),
     GetPage(
-<<<<<<< HEAD
       name: _Paths.SPLASH,
       page: () => const SplashView(),
       binding: SplashBinding(),
-=======
+    ),
+    GetPage(
       name: _Paths.CREATE_EVENT,
       page: () => const CreateEventView(),
       binding: CreateEventBinding(),
@@ -113,7 +113,6 @@ class AppPages {
       name: _Paths.EDIT_PROFILE,
       page: () => const EditProfileView(),
       binding: EditProfileBinding(),
->>>>>>> aa520cb01b6023f399a89eb4a45fde478b62b7c3
     ),
   ];
 }

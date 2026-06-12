@@ -283,7 +283,8 @@ class YourEventView extends GetView<YourEventController> {
                                             .createdEvents[index].status ==
                                         "approved" &&
                                     controller.createdEvents[index].subStatus !=
-                                        "cancelled",
+                                        "cancelled" && controller.createdEvents[index].subStatus !=
+                                    "completed",
                               );
                             },
                           );

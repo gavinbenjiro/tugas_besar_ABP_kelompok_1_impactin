@@ -130,25 +130,12 @@ class ProfileController extends GetxController {
     expImagePath.value = "";
 
     if (exp != null) {
-<<<<<<< HEAD
       // Mode Edit
       expTitleController.text = exp['title'] ?? '';
       // Gunakan 'host_name' sesuai dengan yang disimpan di database
       expHostController.text = exp['host_name'] ?? '';
       expDescController.text = exp['description'] ?? '';
       expDateController.text = exp['date']?.toString() ?? '';
-=======
-      expTitleController.text = exp['title']?.toString() ?? "";
-      expHostController.text = exp['creator']?.toString() ?? exp['host_name']?.toString() ?? "";
-
-      String date = exp['date']?.toString() ?? "";
-      if (date.length >= 10) date = date.substring(0, 10);
-      expDateController.text = date;
-
-      expDescController.text = exp['description']?.toString() ?? "";
-      expImageUrl.value = exp['cover_image']?.toString() ??
-          "https://example.com/gamagudabo.jpg";
->>>>>>> aa520cb01b6023f399a89eb4a45fde478b62b7c3
     } else {
       // Mode Add
       expTitleController.clear();

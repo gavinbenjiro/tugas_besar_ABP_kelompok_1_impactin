@@ -441,3 +441,30 @@ func (c *EventController) GetYourJoinedEvents(ctx *gin.Context) {
 		"data": events,
 	})
 }
+func (c *EventController) GetNearbyEvents(ctx *gin.Context) {
+
+	var req request.NearbyEventRequestDto
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	events, err := c.eventService.GetNearbyEvents(
+		req.Latitude,
+		req.Longitude,
+	)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "nearby events retrieved",
+		"data":    events,
+	})
+}

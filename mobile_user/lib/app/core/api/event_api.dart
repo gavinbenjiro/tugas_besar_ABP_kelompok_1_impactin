@@ -5,6 +5,7 @@ import 'api_endpoints.dart';
 import '../../data/models/event_model.dart';
 import '../../data/models/manage_event_model.dart';
 import '../../data/models/search_event_model.dart';
+import '../../data/models/nearby_event_model.dart';
 
 class EventApi {
   static Future<Response> getAllEvents() {
@@ -209,5 +210,38 @@ class EventApi {
         "description": description,
       },
     );
+  }
+
+  static Future<List<NearbyEventModel>> getNearbyEvents({
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final response = await ApiClient.dio.post(
+        ApiEndpoints.getNearbyEvents,
+        data: {
+          "latitude": latitude,
+          "longitude": longitude,
+        },
+      );
+
+      final data = response.data["data"];
+
+      if (data == null) {
+        return [];
+      }
+
+      return (data as List)
+          .map(
+            (e) => NearbyEventModel.fromJson(
+              Map<String, dynamic>.from(e),
+            ),
+          )
+          .toList();
+    } on DioException catch (e) {
+      throw Exception(
+        e.response?.data?["message"] ?? "Failed to load nearby events",
+      );
+    }
   }
 }

@@ -37,10 +37,13 @@ type EventService interface {
 }
 
 type eventService struct {
-	eventRepo       repositories.EventRepository
-	profileRepo     repositories.ProfileRepository
-	applicantRepo   repositories.ApplicantRepository
-	participantRepo repositories.ParticipantRepository
+	eventRepo              repositories.EventRepository
+	profileRepo            repositories.ProfileRepository
+	applicantRepo          repositories.ApplicantRepository
+	participantRepo        repositories.ParticipantRepository
+	userRepo               *repositories.UserRepository
+	notificationService    *NotificationService
+	notificationHistorySvc *NotificationHistoryService
 }
 
 func NewEventService(
@@ -48,8 +51,20 @@ func NewEventService(
 	profileRepo repositories.ProfileRepository,
 	applicantRepo repositories.ApplicantRepository,
 	participantRepo repositories.ParticipantRepository,
+	userRepo *repositories.UserRepository,
+	notificationService *NotificationService,
+	notificationHistorySvc *NotificationHistoryService,
 ) EventService {
-	return &eventService{eventRepo, profileRepo, applicantRepo, participantRepo}
+
+	return &eventService{
+		eventRepo:              eventRepo,
+		profileRepo:            profileRepo,
+		applicantRepo:          applicantRepo,
+		participantRepo:        participantRepo,
+		userRepo:               userRepo,
+		notificationService:    notificationService,
+		notificationHistorySvc: notificationHistorySvc,
+	}
 }
 
 func (s *eventService) CreateEvent(userID uint, dto request.EventRequestDto) (response.EventResponseDto, error) {
@@ -541,6 +556,46 @@ func (s *eventService) AdminEventApproval(eventID uint, action string) (response
 
 	if err := s.eventRepo.UpdateApprovalStatus(event); err != nil {
 		return response.AdminEventApprovalResponseDto{}, err
+	}
+
+	title := ""
+	message := ""
+
+	if action == "accept" {
+		title = "Event Approved"
+		message = "Your event \"" + event.Title + "\" has been approved."
+	} else {
+		title = "Event Rejected"
+		message = "Your event \"" + event.Title + "\" has been rejected."
+	}
+
+	_ = s.notificationHistorySvc.CreateNotification(
+		event.UserID,
+		title,
+		message,
+	)
+
+	_ = s.userRepo.UpdateHasUnreadNotification(
+		event.UserID,
+		true,
+	)
+
+	tokens, err := s.userRepo.GetFCMTokensByUserID(
+		event.UserID,
+	)
+
+	if err == nil {
+
+		body := message
+
+		for _, token := range tokens {
+
+			_ = s.notificationService.SendToToken(
+				token,
+				title,
+				body,
+			)
+		}
 	}
 
 	return response.AdminEventApprovalResponseDto{

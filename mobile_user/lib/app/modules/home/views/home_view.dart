@@ -41,37 +41,50 @@ class HomeView extends GetView<HomeController> {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.grey.shade300,
-                      ),
-                    ),
-                    child: Stack(
-                      children: [
-                        const Center(
-                          child: Icon(
-                            Icons.notifications_none,
-                            size: 26,
-                          ),
+                  GestureDetector(
+                    onTap: () async {
+                      await Get.toNamed(
+                        Routes.NOTIFICATION,
+                      );
+
+                      controller.getBellStatus();
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.grey.shade300,
                         ),
-                        Positioned(
-                          top: 12,
-                          right: 14,
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
+                      ),
+                      child: Stack(
+                        children: [
+                          const Center(
+                            child: Icon(
+                              Icons.notifications_none,
+                              size: 26,
                             ),
                           ),
-                        ),
-                      ],
+                          Obx(
+                            () => controller.hasUnreadNotification.value
+                                ? Positioned(
+                                    top: 12,
+                                    right: 14,
+                                    child: Container(
+                                      width: 10,
+                                      height: 10,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  )
+                                : const SizedBox(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],

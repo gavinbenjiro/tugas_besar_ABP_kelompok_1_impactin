@@ -3,6 +3,8 @@ package controllers
 import (
 	"backend/internal/app/dtos/request"
 	"backend/internal/app/services"
+
+	// "backend/internal/app/utils"
 	"log"
 	"net/http"
 
@@ -83,5 +85,64 @@ func (c *UserController) Login(ctx *gin.Context) {
 		"message": resp.Message,
 		"token":   resp.Token,
 		"data":    resp.Data,
+	})
+}
+
+func (c *UserController) SaveFCMToken(ctx *gin.Context) {
+
+	var req request.FCMTokenRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
+		return
+	}
+
+	userIDInterface, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
+		return
+	}
+
+	userID := userIDInterface.(uint)
+
+	if err := c.UserService.SaveFCMToken(
+		userID,
+		req.Token,
+	); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "fcm token saved",
+	})
+}
+
+func (c *UserController) Logout(ctx *gin.Context) {
+
+	var req request.FCMTokenRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
+		return
+	}
+
+	if err := c.UserService.Logout(req.Token); err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "logout success",
 	})
 }

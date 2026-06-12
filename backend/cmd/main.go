@@ -20,6 +20,7 @@ import (
 func main() {
 	// Initialize DB
 	db := config.InitDB()
+	config.InitFirebase()
 	SeedAdmin(db)
 
 	// === Repository ===
@@ -32,16 +33,38 @@ func main() {
 	participantRepo := repositories.NewParticipantRepository(db)
 	reportRepo := repositories.NewReportRepository(db)
 	expRepo := repositories.NewExperienceRepository(db)
+	notificationRepo := repositories.NewNotificationRepository(db)
 
 	// === Service ===
+	notificationHistorySvc :=
+		services.NewNotificationHistoryService(
+			notificationRepo,
+			userRepo,
+		)
+	notificationSvc, err := services.NewNotificationService()
+	if err != nil {
+		log.Fatal(err)
+	}
 	userSvc := services.NewUserService(userRepo, profileRepo)
 	profileSvc := services.NewProfileService(profileRepo, userRepo, skillRepo, eventRepo, expRepo)
-	eventSvc := services.NewEventService(eventRepo, profileRepo, applicantRepo, participantRepo)
+	eventSvc := services.NewEventService(
+		eventRepo,
+		profileRepo,
+		applicantRepo,
+		participantRepo,
+		userRepo,
+		notificationSvc,
+		notificationHistorySvc,
+	)
 	adminSvc := services.NewAdminService(adminRepo)
 	reportSvc := services.NewReportService(reportRepo, eventRepo, participantRepo, profileRepo)
 	expSvc := services.NewExperienceService(expRepo)
 
 	// === Controller ===
+	notificationCtrl :=
+		controllers.NewNotificationController(
+			notificationHistorySvc,
+		)
 	userCtrl := controllers.NewUserController(userSvc)
 	profileCtrl := controllers.NewProfileController(profileSvc)
 	adminCtrl := controllers.NewAdminController(adminSvc)
@@ -64,6 +87,7 @@ func main() {
 		adminCtrl,
 		reportCtrl,
 		expCtrl,
+		notificationCtrl,
 	)
 
 	// Start server

@@ -1,6 +1,7 @@
 class ApiEndpoints {
   static const register = '/user/register';
   static const login = '/user/login';
+  static const logout = '/user/logout';
 
   static const profile = '/user/profile';
   static const experience = '/user/profile/experience';
@@ -39,4 +40,9 @@ class ApiEndpoints {
 
   static String joinEvent(int eventId) => "/user/events/join/$eventId";
   static String reportEvent(int eventId) => "/user/events/report/$eventId";
+
+  static const saveFcmToken = "/user/fcm-token";
+  static const getNotifications = "/notifications";
+  static const bellStatus = "/notification/bell-status";
+  static const markBellRead = "/notification";
 }

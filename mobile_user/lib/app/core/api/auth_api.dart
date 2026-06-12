@@ -31,4 +31,22 @@ class AuthApi {
       },
     );
   }
+
+  static Future<Response> saveFcmToken(String token) {
+    return ApiClient.dio.post(
+      ApiEndpoints.saveFcmToken,
+      data: {
+        "token": token,
+      },
+    );
+  }
+
+  static Future<Response> logout(String token) {
+    return ApiClient.dio.post(
+      ApiEndpoints.logout,
+      data: {
+        "token": token,
+      },
+    );
+  }
 }

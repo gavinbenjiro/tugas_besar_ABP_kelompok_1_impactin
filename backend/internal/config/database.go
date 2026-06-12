@@ -71,6 +71,8 @@ func InitDB() *gorm.DB {
 		&models.Participant{},
 		&models.Report{},
 		&models.RegularExperience{},
+		&models.UserFcmToken{},
+		&models.Notification{},
 	}
 	// Detect Docker container
 	runningInDocker := isRunningInDocker()

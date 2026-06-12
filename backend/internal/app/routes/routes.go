@@ -29,6 +29,7 @@ func EventRoutes(router *gin.Engine, eventController *controllers.EventControlle
 		auth.PATCH("/cancel/:event_id", eventController.CancelEvent)
 		auth.PATCH("/close/:event_id", eventController.CloseEvent)
 		auth.PATCH("/open/:event_id", eventController.OpenEvent)
+		auth.POST("/nearby", eventController.GetNearbyEvents)
 	}
 
 	authAdmin := router.Group("api/admin/events")

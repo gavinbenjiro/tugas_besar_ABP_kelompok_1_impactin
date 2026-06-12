@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../controllers/create_event_controller.dart';
+import 'package:mobile_user/app/modules/create_event/views/map_picker_view.dart';
+import 'package:latlong2/latlong.dart';
 
 class CreateEventView extends GetView<CreateEventController> {
   const CreateEventView({super.key});
@@ -203,6 +205,25 @@ class CreateEventView extends GetView<CreateEventController> {
                           "Specific Address",
                           controller.specificAddressController,
                           "Enter specific address",
+                        ),
+                        Obx(
+                          () => ElevatedButton(
+                            onPressed: () async {
+                              final result = await Get.to<LatLng>(
+                                () => const MapPickerView(),
+                              );
+
+                              if (result != null) {
+                                controller.latitude.value = result.latitude;
+                                controller.longitude.value = result.longitude;
+                              }
+                            },
+                            child: Text(
+                              controller.latitude.value == null
+                                  ? "Select Location"
+                                  : "Location Selected ✓",
+                            ),
+                          ),
                         ),
                         _buildField(
                           "Address Link",

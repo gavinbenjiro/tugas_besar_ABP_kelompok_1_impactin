@@ -26,7 +26,15 @@ class CreateEventController extends GetxController {
   final maxAgeController = TextEditingController();
   final groupLinkController = TextEditingController();
 
-  final selectedCategory = "".obs;
+  // =========================
+  // STATE
+  // =========================
+
+  final isLoading = false.obs;
+
+  final selectedCategory = ''.obs;
+  final RxnDouble latitude = RxnDouble();
+  final RxnDouble longitude = RxnDouble();
   final categories = [
     "Environment",
     "Education",
@@ -168,6 +176,8 @@ class CreateEventController extends GetxController {
         "min_age": int.tryParse(minAgeController.text) ?? 0,
         "max_age": int.tryParse(maxAgeController.text) ?? 0,
         "group_link": groupLinkController.text.trim(),
+        "latitude": latitude.value,
+        "longitude": longitude.value,
       };
 
       await EventApi.createEvent(body: body);

@@ -31,22 +31,25 @@ class OnboardingView extends GetView<OnboardingController> {
   // Pastikan gambar-gambar ini sudah didaftarkan di pubspec.yaml
   final List<OnboardingContent> _contents = [
     OnboardingContent(
-      image: 'assets/images/onb1_bg.png', 
+      image: 'assets/images/onb1_bg.png',
       smallTitle: 'Get Ready',
       bigTitle: 'New Adventures',
-      description: 'If you like to travel, then this is  for you! Here you can explore the beauty of the world.',
+      description:
+          'If you like to travel, then this is  for you! Here you can explore the beauty of the world.',
     ),
     OnboardingContent(
       image: 'assets/images/onb2_bg.png', // Ganti dengan nama file gambarmu
       smallTitle: 'Share your',
       bigTitle: 'Knowledge',
-      description: 'Leave a footprint of kindness wherever you go. Join us in making quality education accessible to everyone',
+      description:
+          'Leave a footprint of kindness wherever you go. Join us in making quality education accessible to everyone',
     ),
     OnboardingContent(
       image: 'assets/images/onb3_bg.png', // Ganti dengan nama file gambarmu
       smallTitle: 'Answering the Call',
       bigTitle: 'of Humanity',
-      description: 'Every second counts, and your presence could make all the difference.',
+      description:
+          'Every second counts, and your presence could make all the difference.',
     ),
   ];
 
@@ -81,9 +84,11 @@ class OnboardingView extends GetView<OnboardingController> {
                   // TEXT CONTENT
                   SafeArea(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 32),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end, // Dorong teks ke bawah
+                        mainAxisAlignment:
+                            MainAxisAlignment.end, // Dorong teks ke bawah
                         children: [
                           // SMALL TITLE
                           Text(
@@ -119,9 +124,9 @@ class OnboardingView extends GetView<OnboardingController> {
                               height: 1.5,
                             ),
                           ),
-                          
+
                           // Memberikan jarak kosong untuk indikator dan tombol di bawahnya
-                          const SizedBox(height: 130), 
+                          const SizedBox(height: 130),
                         ],
                       ),
                     ),
@@ -144,7 +149,8 @@ class OnboardingView extends GetView<OnboardingController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       _contents.length,
-                      (index) => _buildDot(isActive: index == _currentIndex.value),
+                      (index) =>
+                          _buildDot(isActive: index == _currentIndex.value),
                     ),
                   ),
                   const SizedBox(height: 36),
@@ -155,11 +161,11 @@ class OnboardingView extends GetView<OnboardingController> {
                     height: 58,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Logika Tombol: 
+                        // Logika Tombol:
                         // Jika di halaman terakhir -> Ke halaman Login
                         // Jika tidak -> Geser ke halaman selanjutnya
                         if (_currentIndex.value == _contents.length - 1) {
-                          Get.offAllNamed(Routes.LOGIN);
+                          controller.finishOnboarding();
                         } else {
                           _pageController.nextPage(
                             duration: const Duration(milliseconds: 400),

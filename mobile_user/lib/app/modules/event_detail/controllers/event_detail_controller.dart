@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 
 import '../../../data/models/event_model.dart';
 import '../../../core/api/event_api.dart';
+import 'package:dio/dio.dart';
 
 class EventDetailController extends GetxController {
   final selectedTab = 0.obs;
@@ -68,7 +69,20 @@ class EventDetailController extends GetxController {
       );
 
       await fetchEventDetail(eventId);
+    } on DioException catch (e) {
+      print("STATUS = ${e.response?.statusCode}");
+      print("BODY = ${e.response?.data}");
+
+      Get.snackbar(
+        'Error',
+        e.response?.data?["message"] ??
+            e.response?.data?["error"] ??
+            e.message ??
+            'Unknown error',
+      );
     } catch (e) {
+      print(e);
+
       Get.snackbar(
         'Error',
         e.toString(),

@@ -15,7 +15,7 @@ class ProfileController extends GetxController {
   // REACTIVE STATE (PROFILE DATA)
   // ==========================================
   var isLoading = true.obs;
-
+  var isYou = true.obs;
   var name = ''.obs;
   var status = ''.obs;
   var age = 0.obs;
@@ -65,7 +65,8 @@ class ProfileController extends GetxController {
         expImagePath.value = pickedFile.path;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengakses galeri', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Gagal mengakses galeri',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -76,7 +77,11 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
-      final userId = box.read(StorageKeys.userId);
+
+      final argUserId = Get.arguments;
+      final userId = argUserId != null
+          ? argUserId.toString()
+          : box.read(StorageKeys.userId)?.toString();
 
       if (userId == null || token == null) {
         Get.snackbar('Error', 'Sesi tidak valid. Silakan login kembali.',
@@ -84,12 +89,8 @@ class ProfileController extends GetxController {
         return;
       }
 
-      // Gunakan ProfileApi
-      final response = await ProfileApi.getProfile(
-        userId: userId.toString(),
-        token: token,
-      );
-
+      final response =
+          await ProfileApi.getProfile(userId: userId, token: token);
       final data = response.data;
 
       if (data is Map) {
@@ -109,11 +110,12 @@ class ProfileController extends GetxController {
         }
 
         skills.value = (data['skills'] is List) ? data['skills'] : [];
-        experiences.value = (data['experiences'] is List) ? data['experiences'] : [];
+        experiences.value =
+            (data['experiences'] is List) ? data['experiences'] : [];
         events.value = (data['events'] is List) ? data['events'] : [];
+        isYou.value = data['is_you'] ?? true;
       }
     } on DioException catch (e) {
-      print("GET PROFILE ERROR STATUS: ${e.response?.statusCode}");
       Get.snackbar('Gagal Memuat Profil', 'Gagal menarik data dari server',
           backgroundColor: Colors.orange, colorText: Colors.white);
     } catch (e) {
@@ -176,7 +178,8 @@ class ProfileController extends GetxController {
       },
     );
     if (picked != null) {
-      expDateController.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      expDateController.text =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -197,14 +200,16 @@ class ProfileController extends GetxController {
         imageUrlToSend = await CloudinaryApi.uploadImage(expImagePath.value);
 
         if (imageUrlToSend == null) {
-          Get.snackbar('Gagal', 'Upload gambar gagal', backgroundColor: Colors.red);
+          Get.snackbar('Gagal', 'Upload gambar gagal',
+              backgroundColor: Colors.red);
           isLoading.value = false;
           return;
         }
       } else {
         // Jika TIDAK ada file baru, gunakan link gambar lama (existing)
         // Jika sebelumnya tidak ada gambar, maka hasilnya tetap null
-        imageUrlToSend = existingImageUrl.value.isNotEmpty ? existingImageUrl.value : null;
+        imageUrlToSend =
+            existingImageUrl.value.isNotEmpty ? existingImageUrl.value : null;
       }
 
       // 2. Siapkan data body
@@ -225,16 +230,18 @@ class ProfileController extends GetxController {
       if (id == null) {
         await ProfileApi.addExperience(data: requestBody, token: token);
       } else {
-        await ProfileApi.editExperience(id: id, data: requestBody, token: token);
+        await ProfileApi.editExperience(
+            id: id, data: requestBody, token: token);
       }
 
       fetchProfileData();
       Get.back();
-      Get.snackbar('Sukses', 'Experience berhasil disimpan', backgroundColor: Colors.green);
-
+      Get.snackbar('Sukses', 'Experience berhasil disimpan',
+          backgroundColor: Colors.green);
     } catch (e) {
       print("ERROR DETAIL: $e");
-      Get.snackbar('Gagal', 'Periksa terminal untuk detail error', backgroundColor: Colors.red);
+      Get.snackbar('Gagal', 'Periksa terminal untuk detail error',
+          backgroundColor: Colors.red);
     } finally {
       isLoading.value = false;
     }

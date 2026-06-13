@@ -35,7 +35,7 @@ type EventRepository interface {
 	GetJoinedEvents(userID uint, status string) ([]response.YourEventResponseDto, error)
 	GetCompletedEventsByParticipant(userID uint) ([]response.ProfileCompletedEventDto, error)
 	GetApprovedEvents() ([]models.Event, error)
-	GetNearbyEvents() ([]models.Event, error)
+	GetNearbyEvents(userID uint) ([]models.Event, error)
 }
 
 type eventRepository struct {
@@ -595,12 +595,13 @@ func (r *eventRepository) GetApprovedEvents() ([]models.Event, error) {
 	return events, err
 }
 
-func (r *eventRepository) GetNearbyEvents() ([]models.Event, error) {
+func (r *eventRepository) GetNearbyEvents(userID uint) ([]models.Event, error) {
 	var events []models.Event
 
 	err := r.db.
 		Where("status = ?", "approved").
 		Where("sub_status = ?", "opened").
+		Where("user_id != ?", userID). // exclude own events
 		Where("latitude IS NOT NULL").
 		Where("longitude IS NOT NULL").
 		Find(&events).Error

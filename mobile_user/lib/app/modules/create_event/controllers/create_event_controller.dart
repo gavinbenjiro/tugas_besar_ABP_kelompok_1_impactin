@@ -30,7 +30,6 @@ class CreateEventController extends GetxController {
   // STATE
   // =========================
 
-
   final selectedCategory = ''.obs;
   final RxnDouble latitude = RxnDouble();
   final RxnDouble longitude = RxnDouble();
@@ -54,7 +53,8 @@ class CreateEventController extends GetxController {
         coverImagePath.value = pickedFile.path;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengakses galeri', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Gagal mengakses galeri',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -70,7 +70,8 @@ class CreateEventController extends GetxController {
       lastDate: DateTime(2100),
     );
     if (picked != null) {
-      controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      controller.text =
+          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
     }
   }
 
@@ -89,8 +90,12 @@ class CreateEventController extends GetxController {
   }
 
   bool _validateDateTime() {
-    if (startDateController.text.isEmpty || endDateController.text.isEmpty || startTimeController.text.isEmpty || endTimeController.text.isEmpty) {
-      Get.snackbar("Error", "Tanggal dan waktu harus diisi lengkap", backgroundColor: Colors.red, colorText: Colors.white);
+    if (startDateController.text.isEmpty ||
+        endDateController.text.isEmpty ||
+        startTimeController.text.isEmpty ||
+        endTimeController.text.isEmpty) {
+      Get.snackbar("Error", "Tanggal dan waktu harus diisi lengkap",
+          backgroundColor: Colors.red, colorText: Colors.white);
       return false;
     }
     try {
@@ -101,32 +106,43 @@ class CreateEventController extends GetxController {
       final startTimeParts = startTimeController.text.split(RegExp(r'[: ]'));
       int startHour = int.parse(startTimeParts[0]);
       int startMin = int.parse(startTimeParts[1]);
-      if (startTimeController.text.toLowerCase().contains("pm") && startHour < 12) startHour += 12;
-      if (startTimeController.text.toLowerCase().contains("am") && startHour == 12) startHour = 0;
+      if (startTimeController.text.toLowerCase().contains("pm") &&
+          startHour < 12) startHour += 12;
+      if (startTimeController.text.toLowerCase().contains("am") &&
+          startHour == 12) startHour = 0;
 
       final endTimeParts = endTimeController.text.split(RegExp(r'[: ]'));
       int endHour = int.parse(endTimeParts[0]);
       int endMin = int.parse(endTimeParts[1]);
-      if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12) endHour += 12;
-      if (endTimeController.text.toLowerCase().contains("am") && endHour == 12) endHour = 0;
+      if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12)
+        endHour += 12;
+      if (endTimeController.text.toLowerCase().contains("am") && endHour == 12)
+        endHour = 0;
 
-      if (startDate.year == now.year && startDate.month == now.month && startDate.day == now.day) {
+      if (startDate.year == now.year &&
+          startDate.month == now.month &&
+          startDate.day == now.day) {
         final currentMinutes = now.hour * 60 + now.minute;
         final startMinutes = startHour * 60 + startMin;
         if (startMinutes < currentMinutes) {
-          Get.snackbar("Waktu Tidak Valid", "Waktu mulai tidak boleh kurang dari jam saat ini.", backgroundColor: Colors.red, colorText: Colors.white);
+          Get.snackbar("Waktu Tidak Valid",
+              "Waktu mulai tidak boleh kurang dari jam saat ini.",
+              backgroundColor: Colors.red, colorText: Colors.white);
           return false;
         }
       }
 
-      if (startDate.year == endDate.year && startDate.month == endDate.month && startDate.day == endDate.day) {
+      if (startDate.year == endDate.year &&
+          startDate.month == endDate.month &&
+          startDate.day == endDate.day) {
         final startTotalMinutes = startHour * 60 + startMin;
         final endTotalMinutes = endHour * 60 + endMin;
         if (startTotalMinutes >= endTotalMinutes) {
           Get.defaultDialog(
             title: "Peringatan Waktu",
             titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-            middleText: "Waktu mulai tidak boleh sama dengan atau lebih besar dari waktu selesai di hari yang sama.",
+            middleText:
+                "Waktu mulai tidak boleh sama dengan atau lebih besar dari waktu selesai di hari yang sama.",
             textConfirm: "Oke, Paham",
             confirmTextColor: Colors.white,
             buttonColor: const Color(0xFF0B5D51),
@@ -137,7 +153,8 @@ class CreateEventController extends GetxController {
       }
       return true;
     } catch (e) {
-      Get.snackbar("Error", "Format waktu/tanggal salah", backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", "Format waktu/tanggal salah",
+          backgroundColor: Colors.red, colorText: Colors.white);
       return false;
     }
   }
@@ -145,15 +162,18 @@ class CreateEventController extends GetxController {
   Future<void> createEvent() async {
     if (!_validateDateTime()) return;
     if (coverImagePath.value.isEmpty) {
-      Get.snackbar('Error', 'Silakan pilih cover image terlebih dahulu', backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar('Error', 'Silakan pilih cover image terlebih dahulu',
+          backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
 
     try {
       isLoading.value = true;
-      String? imageUrlFromCloudinary = await CloudinaryApi.uploadImage(coverImagePath.value);
+      String? imageUrlFromCloudinary =
+          await CloudinaryApi.uploadImage(coverImagePath.value);
       if (imageUrlFromCloudinary == null) {
-        Get.snackbar('Gagal', 'Upload gambar ke server gagal', backgroundColor: Colors.red, colorText: Colors.white);
+        Get.snackbar('Gagal', 'Upload gambar ke server gagal',
+            backgroundColor: Colors.red, colorText: Colors.white);
         isLoading.value = false;
         return;
       }
@@ -182,9 +202,11 @@ class CreateEventController extends GetxController {
       await EventApi.createEvent(body: body);
 
       Get.back();
-      Get.snackbar("Success", "Event successfully created", backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar("Success", "Event successfully created",
+          backgroundColor: Colors.green, colorText: Colors.white);
     } catch (e) {
-      Get.snackbar("Error", "Gagal membuat event: $e", backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar("Error", "Gagal membuat event: $e",
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
@@ -192,10 +214,20 @@ class CreateEventController extends GetxController {
 
   @override
   void onClose() {
-    titleController.dispose(); locationController.dispose(); specificAddressController.dispose(); addressLinkController.dispose();
-    startDateController.dispose(); endDateController.dispose(); startTimeController.dispose(); endTimeController.dispose();
-    maxParticipantController.dispose(); descriptionController.dispose(); termsController.dispose(); minAgeController.dispose();
-    maxAgeController.dispose(); groupLinkController.dispose();
+    titleController.dispose();
+    locationController.dispose();
+    specificAddressController.dispose();
+    addressLinkController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    maxParticipantController.dispose();
+    descriptionController.dispose();
+    termsController.dispose();
+    minAgeController.dispose();
+    maxAgeController.dispose();
+    groupLinkController.dispose();
     super.onClose();
   }
 }

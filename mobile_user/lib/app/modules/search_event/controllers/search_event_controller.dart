@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
@@ -43,6 +44,26 @@ class SearchEventController extends GetxController {
     fetchNearbyEvents();
   }
 
+  @override
+  void onClose() {
+    searchController.dispose();
+    super.onClose();
+  }
+
+  String _extractErrorMessage(
+    DioException e,
+    String fallback,
+  ) {
+    if (e.response?.data is Map) {
+      return e.response?.data?['message']?.toString() ??
+          e.response?.data?['error']?.toString() ??
+          fallback;
+    } else if (e.response?.data is String) {
+      return e.response!.data;
+    }
+    return fallback;
+  }
+
   Future<void> fetchNearbyEvents() async {
     try {
       isNearbyLoading.value = true;
@@ -55,7 +76,26 @@ class SearchEventController extends GetxController {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        throw Exception("Location permission denied");
+        Get.snackbar(
+          "Location Permission",
+          "Enable location permission to see nearby events",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        nearbyEvents.clear();
+        return;
+      }
+
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Get.snackbar(
+          "Location Disabled",
+          "Please enable location services to see nearby events",
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+        nearbyEvents.clear();
+        return;
       }
 
       final position = await Geolocator.getCurrentPosition();
@@ -70,12 +110,30 @@ class SearchEventController extends GetxController {
       print(
         "NEARBY COUNT = ${nearbyEvents.length}",
       );
+    } on DioException catch (e) {
+      print("NEARBY DIO ERROR = ${e.response?.data}");
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(e, "Failed to load nearby events"),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } on LocationServiceDisabledException catch (e) {
+      print("LOCATION SERVICE DISABLED = $e");
+      Get.snackbar(
+        "Location Disabled",
+        "Please enable location services to see nearby events",
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print("NEARBY ERROR = $e");
 
       Get.snackbar(
         "Error",
-        e.toString(),
+        "Failed to get your location",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     } finally {
       isNearbyLoading.value = false;
@@ -93,10 +151,21 @@ class SearchEventController extends GetxController {
       );
 
       events.assignAll(result);
-    } catch (e) {
+    } on DioException catch (e) {
+      print("FETCH EVENTS DIO ERROR = ${e.response?.data}");
       Get.snackbar(
         'Error',
-        e.toString(),
+        _extractErrorMessage(e, 'Failed to load events'),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("FETCH EVENTS ERROR = $e");
+      Get.snackbar(
+        'Error',
+        'Something went wrong while loading events',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
       );
     } finally {
       isLoading.value = false;
@@ -104,10 +173,14 @@ class SearchEventController extends GetxController {
   }
 
   void clearFilters() {
-    selectedCategory.value = 'All';
-    selectedAges.clear();
-    searchController.clear();
+    try {
+      selectedCategory.value = 'All';
+      selectedAges.clear();
+      searchController.clear();
 
-    fetchEvents();
+      fetchEvents();
+    } catch (e) {
+      print("CLEAR FILTERS ERROR = $e");
+    }
   }
 }

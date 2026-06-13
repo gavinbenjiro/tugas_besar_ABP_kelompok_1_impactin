@@ -30,7 +30,6 @@ class CreateEventController extends GetxController {
   // STATE
   // =========================
 
-  final isLoading = false.obs;
 
   final selectedCategory = ''.obs;
   final RxnDouble latitude = RxnDouble();

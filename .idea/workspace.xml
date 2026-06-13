@@ -6,21 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="8de4d51d-9b03-49e8-9947-2cdb190c7d1b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/android/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/android/settings.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/controllers/create_event_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/controllers/create_event_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/views/create_event_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/views/create_event_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/home/views/home_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/home/views/home_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/manage_event/views/manage_event_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/manage_event/views/manage_event_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/notification/views/notification_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/notification/views/notification_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/profile/controllers/profile_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/profile/controllers/profile_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/profile/views/profile_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/profile/views/profile_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/search_event/views/search_event_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/search_event/views/search_event_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/your_event/views/your_event_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/your_event/views/your_event_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/routes/app_routes.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/routes/app_routes.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/pubspec.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
@@ -62,6 +50,7 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
+    "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "awa",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",

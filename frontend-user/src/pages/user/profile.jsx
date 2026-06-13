@@ -186,9 +186,9 @@ const ProfilePage = () => {
           name: res.name,
           username: res.username,
           role: res.status || "User",
-          age: res.age ? `${res.age} Tahun` : "-",
+          age: res.age ? `${res.age} years old` : "-",
           location: res.city || "-",
-          bio: res.bio || "Belum ada bio.",
+          bio: res.bio || "Bio not set.",
           skills: Array.isArray(res.skills)
             ? res.skills.map((s) => (typeof s === "string" ? s : s.skills))
             : [],

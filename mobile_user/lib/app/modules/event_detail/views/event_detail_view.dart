@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/event_detail_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EventDetailView extends GetView<EventDetailController> {
   const EventDetailView({super.key});
@@ -583,18 +584,65 @@ class EventDetailView extends GetView<EventDetailController> {
   Widget _locationSection(event) {
     return Column(
       children: [
-        Container(
-          height: 180,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(28),
-          ),
-          child: Center(
-            child: Icon(
-              Icons.location_on,
-              size: 54,
-              color: Colors.teal.shade300,
+        GestureDetector(
+          onTap: () async {
+            final link = event.addressLink;
+            if (link == null || link.isEmpty) return;
+
+            final uri = Uri.parse(link);
+            if (await canLaunchUrl(uri)) {
+              await launchUrl(uri, mode: LaunchMode.externalApplication);
+            } else {
+              Get.snackbar('Error', 'Could not open the map link');
+            }
+          },
+          child: Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(28),
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Center(
+                  child: Icon(
+                    Icons.location_on,
+                    size: 54,
+                    color: Colors.teal.shade300,
+                  ),
+                ),
+                Positioned(
+                  bottom: 14,
+                  right: 14,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0A4F46),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.map_outlined, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text(
+                          'Open in Maps',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

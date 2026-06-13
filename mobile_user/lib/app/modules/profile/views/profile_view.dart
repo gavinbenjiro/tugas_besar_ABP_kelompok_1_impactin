@@ -135,59 +135,67 @@ class ProfileView extends GetView<ProfileController> {
                             // =========================================
                             // EDIT PROFILE BUTTON
                             // =========================================
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                // Tombol Change Password
-                                GestureDetector(
-                                  onTap: () =>
-                                      _showChangePasswordDialog(context),
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: size.width * 0.04,
-                                        vertical: size.height * 0.012),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(
-                                          0.8), // Warna merah untuk aksi sensitif
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Text("Change Password",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: size.width * 0.032)),
-                                  ),
-                                ),
-                                SizedBox(width: size.width * 0.03),
-                                // Tombol Edit Profile (yang sudah ada)
-                                GestureDetector(
-                                  onTap: () async {
-                                    await Get.toNamed(Routes.EDIT_PROFILE);
-                                    controller.fetchProfileData();
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: size.width * 0.05,
-                                        vertical: size.height * 0.012),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(30),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Text("Edit profile",
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: size.width * 0.036)),
-                                        SizedBox(width: size.width * 0.03),
-                                        Icon(Icons.edit_outlined,
-                                            color: Colors.white,
-                                            size: size.width * 0.05),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            Obx(() => controller.isYou.value
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      // Tombol Change Password
+                                      GestureDetector(
+                                        onTap: () =>
+                                            _showChangePasswordDialog(context),
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: size.width * 0.04,
+                                              vertical: size.height * 0.012),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.8),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Text("Change Password",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize:
+                                                      size.width * 0.032)),
+                                        ),
+                                      ),
+                                      SizedBox(width: size.width * 0.03),
+                                      // Tombol Edit Profile
+                                      GestureDetector(
+                                        onTap: () async {
+                                          await Get.toNamed(
+                                              Routes.EDIT_PROFILE);
+                                          controller.fetchProfileData();
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: size.width * 0.05,
+                                              vertical: size.height * 0.012),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                Colors.white.withOpacity(0.15),
+                                            borderRadius:
+                                                BorderRadius.circular(30),
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              Text("Edit profile",
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize:
+                                                          size.width * 0.036)),
+                                              SizedBox(
+                                                  width: size.width * 0.03),
+                                              Icon(Icons.edit_outlined,
+                                                  color: Colors.white,
+                                                  size: size.width * 0.05),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox.shrink()),
                           ],
                         ),
                       ),
@@ -283,27 +291,28 @@ class ProfileView extends GetView<ProfileController> {
                   _sectionCard(
                     context,
                     title: "General Experience",
-                    trailing: GestureDetector(
-                      onTap: () => _showExperienceDialog(
-                          context), // ACTION BUKA POPUP ADD
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: size.width * 0.04,
-                          vertical: size.height * 0.008,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF114B3A),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          "Add Experience",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size.width * 0.03,
-                          ),
-                        ),
-                      ),
-                    ),
+                    trailing: controller.isYou.value
+                        ? GestureDetector(
+                            onTap: () => _showExperienceDialog(context),
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: size.width * 0.04,
+                                vertical: size.height * 0.008,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF114B3A),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                "Add Experience",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: size.width * 0.03,
+                                ),
+                              ),
+                            ),
+                          )
+                        : null,
                     child: controller.experiences.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.only(top: 8.0),
@@ -327,66 +336,68 @@ class ProfileView extends GetView<ProfileController> {
                   // =================================================
                   // LOGOUT BUTTON
                   // =================================================
-                  Padding(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: size.width * 0.025),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: size.height * 0.065,
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red.shade500,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
+                  Obx(() => controller.isYou.value
+                      ? Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.025),
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: size.height * 0.065,
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red.shade500,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              onPressed: () async {
+                                try {
+                                  final fcmToken = await FirebaseMessaging
+                                      .instance
+                                      .getToken();
+
+                                  if (fcmToken != null) {
+                                    await AuthApi.logout(fcmToken);
+                                  }
+
+                                  final box = GetStorage();
+
+                                  box.remove(StorageKeys.token);
+                                  box.remove(StorageKeys.userId);
+                                  box.remove(StorageKeys.username);
+                                  box.remove(StorageKeys.email);
+
+                                  Get.offAllNamed(Routes.LOGIN);
+                                } catch (e) {
+                                  print("LOGOUT ERROR: $e");
+
+                                  final box = GetStorage();
+
+                                  box.remove(StorageKeys.token);
+                                  box.remove(StorageKeys.userId);
+                                  box.remove(StorageKeys.username);
+                                  box.remove(StorageKeys.email);
+
+                                  Get.offAllNamed(Routes.LOGIN);
+                                }
+                              },
+                              icon: Icon(
+                                Icons.logout,
+                                color: Colors.white,
+                                size: size.width * 0.05,
+                              ),
+                              label: Text(
+                                "Logout",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: size.width * 0.042,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                        onPressed: () async {
-                          try {
-                            final fcmToken =
-                                await FirebaseMessaging.instance.getToken();
-
-                            if (fcmToken != null) {
-                              await AuthApi.logout(fcmToken);
-                            }
-
-                            final box = GetStorage();
-
-                            box.remove(StorageKeys.token);
-                            box.remove(StorageKeys.userId);
-                            box.remove(StorageKeys.username);
-                            box.remove(StorageKeys.email);
-
-                            Get.offAllNamed(Routes.LOGIN);
-                          } catch (e) {
-                            print("LOGOUT ERROR: $e");
-
-                            // Still logout locally even if API fails
-                            final box = GetStorage();
-
-                            box.remove(StorageKeys.token);
-                            box.remove(StorageKeys.userId);
-                            box.remove(StorageKeys.username);
-                            box.remove(StorageKeys.email);
-
-                            Get.offAllNamed(Routes.LOGIN);
-                          }
-                        },
-                        icon: Icon(
-                          Icons.logout,
-                          color: Colors.white,
-                          size: size.width * 0.05,
-                        ),
-                        label: Text(
-                          "Logout",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: size.width * 0.042,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                        )
+                      : const SizedBox.shrink()),
                   SizedBox(height: size.height * 0.03),
                 ],
               ),
@@ -571,45 +582,46 @@ class ProfileView extends GetView<ProfileController> {
                       fontSize: size.width * 0.034,
                       height: 1.5),
                 ),
-                SizedBox(height: size.height * 0.02),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.red.shade200),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          padding: EdgeInsets.symmetric(
-                              vertical: size.height * 0.016),
+                if (controller.isYou.value) ...[
+                  SizedBox(height: size.height * 0.02),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.red.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            padding: EdgeInsets.symmetric(
+                                vertical: size.height * 0.016),
+                          ),
+                          onPressed: () {
+                            _showDeleteDialog(context, expId);
+                          },
+                          child: const Text("Delete",
+                              style: TextStyle(color: Colors.red)),
                         ),
-                        onPressed: () {
-                          _showDeleteDialog(context, expId);
-                        },
-                        child: const Text("Delete",
-                            style: TextStyle(color: Colors.red)),
                       ),
-                    ),
-                    SizedBox(width: size.width * 0.02),
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.green.shade200),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          padding: EdgeInsets.symmetric(
-                              vertical: size.height * 0.016),
+                      SizedBox(width: size.width * 0.02),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: Colors.green.shade200),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            padding: EdgeInsets.symmetric(
+                                vertical: size.height * 0.016),
+                          ),
+                          onPressed: () {
+                            _showExperienceDialog(context, experience: exp);
+                          },
+                          child: const Text("Edit",
+                              style: TextStyle(color: Colors.green)),
                         ),
-                        onPressed: () {
-                          // ACTION BUKA POPUP EDIT
-                          _showExperienceDialog(context, experience: exp);
-                        },
-                        child: const Text("Edit",
-                            style: TextStyle(color: Colors.green)),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
                 // Kode "SizedBox" dan "Text" deskripsi yang berada di sini sebelumnya telah dihapus.
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_user/app/routes/app_pages.dart';
 
 import '../controllers/manage_event_controller.dart';
 
@@ -43,10 +44,10 @@ class ManageEventView extends GetView<ManageEventController> {
                       event.coverImage,
                       fit: BoxFit.cover,
                       errorBuilder: (
-                          context,
-                          error,
-                          stackTrace,
-                          ) {
+                        context,
+                        error,
+                        stackTrace,
+                      ) {
                         return Container(
                           color: const Color(0xFF114B3A),
                           child: const Center(
@@ -59,10 +60,10 @@ class ManageEventView extends GetView<ManageEventController> {
                         );
                       },
                       loadingBuilder: (
-                          context,
-                          child,
-                          progress,
-                          ) {
+                        context,
+                        child,
+                        progress,
+                      ) {
                         if (progress == null) return child;
 
                         return const Center(
@@ -147,8 +148,8 @@ class ManageEventView extends GetView<ManageEventController> {
                                 Text(
                                   event.startDate
                                       .split(
-                                    "T",
-                                  )
+                                        "T",
+                                      )
                                       .first,
                                   style: const TextStyle(
                                     color: Colors.grey,
@@ -222,24 +223,24 @@ class ManageEventView extends GetView<ManageEventController> {
                                 Expanded(
                                   child: ElevatedButton(
                                     onPressed:
-                                    (!event.canOpen && !event.canClose)
-                                        ? null
-                                        : () {
-                                      if (event.canOpen) {
-                                        controller.openEvent();
-                                      } else if (event.canClose) {
-                                        controller.closeEvent();
-                                      }
-                                    },
+                                        (!event.canOpen && !event.canClose)
+                                            ? null
+                                            : () {
+                                                if (event.canOpen) {
+                                                  controller.openEvent();
+                                                } else if (event.canClose) {
+                                                  controller.closeEvent();
+                                                }
+                                              },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
-                                      !event.canOpen && !event.canClose
-                                          ? Colors.grey.shade400
-                                          : event.canOpen
-                                          ? Colors.green
-                                          : const Color(0xFFE6B325),
+                                          !event.canOpen && !event.canClose
+                                              ? Colors.grey.shade400
+                                              : event.canOpen
+                                                  ? Colors.green
+                                                  : const Color(0xFFE6B325),
                                       disabledBackgroundColor:
-                                      Colors.grey.shade400,
+                                          Colors.grey.shade400,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(16),
                                       ),
@@ -252,8 +253,8 @@ class ManageEventView extends GetView<ManageEventController> {
                                       !event.canOpen && !event.canClose
                                           ? "Event Ongoing"
                                           : event.canOpen
-                                          ? "Open Event"
-                                          : "Close Event",
+                                              ? "Open Event"
+                                              : "Close Event",
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
@@ -295,12 +296,14 @@ class ManageEventView extends GetView<ManageEventController> {
                       // ==========================================
                       Builder(
                         builder: (context) {
-                          final tabController = DefaultTabController.of(context);
+                          final tabController =
+                              DefaultTabController.of(context);
                           return AnimatedBuilder(
                             animation: tabController,
                             builder: (context, child) {
                               return Padding(
-                                padding: EdgeInsets.symmetric(horizontal: width_size * 0.05),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: width_size * 0.05),
                                 child: Row(
                                   children: [
                                     Expanded(
@@ -338,166 +341,219 @@ class ManageEventView extends GetView<ManageEventController> {
                             // =====================================
                             event.applicants.isEmpty
                                 ? const Center(
-                              child: Text(
-                                "No applicants yet",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            )
+                                    child: Text(
+                                      "No applicants yet",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
                                 : ListView.builder(
-                              padding: EdgeInsets.all(width_size * 0.04),
-                              itemCount: event.applicants.length,
-                              itemBuilder: (
-                                  context,
-                                  index,
-                                  ) {
-                                final user = event.applicants[index];
+                                    padding: EdgeInsets.all(width_size * 0.04),
+                                    itemCount: event.applicants.length,
+                                    itemBuilder: (
+                                      context,
+                                      index,
+                                    ) {
+                                      final user = event.applicants[index];
 
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFD7ECE4),
-                                    borderRadius: BorderRadius.circular(16),
+                                      return Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 12),
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFD7ECE4),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              children: [
+                                                CircleAvatar(
+                                                  radius: width_size * 0.05,
+                                                  backgroundColor:
+                                                      const Color(0xFF114B3A),
+                                                  child: const Icon(
+                                                      Icons.person,
+                                                      color: Colors.white,
+                                                      size: 20),
+                                                ),
+                                                const SizedBox(width: 12),
+                                                Expanded(
+                                                  child: Text(
+                                                    user.name,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize:
+                                                          width_size * 0.038,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Get.toNamed(
+                                                      Routes.PROFILE,
+                                                      arguments: user.userId,
+                                                    );
+                                                  },
+                                                  child: const Text("details"),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: ElevatedButton(
+                                                    onPressed: () {
+                                                      controller
+                                                          .approveApplicant(
+                                                              user.userId);
+                                                    },
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12)),
+                                                    ),
+                                                    child: const Text("Approve",
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white)),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: ElevatedButton(
+                                                    onPressed: () {
+                                                      controller
+                                                          .rejectApplicant(
+                                                              user.userId);
+                                                    },
+                                                    style: ElevatedButton
+                                                        .styleFrom(
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          12)),
+                                                    ),
+                                                    child: const Text("Reject",
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white)),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  child: Column(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          CircleAvatar(
-                                            radius: width_size * 0.05,
-                                            backgroundColor: const Color(0xFF114B3A),
-                                            child: const Icon(Icons.person, color: Colors.white, size: 20),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Expanded(
-                                            child: Text(
-                                              user.name,
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                              style: TextStyle(
-                                                fontSize: width_size * 0.038,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {},
-                                            child: const Text("details"),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                controller.approveApplicant(user.userId);
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.green,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                              ),
-                                              child: const Text("Approve", style: TextStyle(color: Colors.white)),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: ElevatedButton(
-                                              onPressed: () {
-                                                controller.rejectApplicant(user.userId);
-                                              },
-                                              style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
-                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                              ),
-                                              child: const Text("Reject", style: TextStyle(color: Colors.white)),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
 
                             // =====================================
                             // PARTICIPANTS
                             // =====================================
                             event.participants.isEmpty
                                 ? const Center(
-                              child: Text(
-                                "No participants yet",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            )
+                                    child: Text(
+                                      "No participants yet",
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
                                 : ListView.builder(
-                              padding: EdgeInsets.all(width_size * 0.04),
-                              itemCount: event.participants.length,
-                              itemBuilder: (
-                                  context,
-                                  index,
-                                  ) {
-                                final user = event.participants[index];
+                                    padding: EdgeInsets.all(width_size * 0.04),
+                                    itemCount: event.participants.length,
+                                    itemBuilder: (
+                                      context,
+                                      index,
+                                    ) {
+                                      final user = event.participants[index];
 
-                                return Container(
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFD7ECE4),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: width_size * 0.05,
-                                        backgroundColor: const Color(0xFF114B3A),
-                                        child: const Icon(Icons.person, color: Colors.white, size: 20),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Text(
-                                          user.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: width_size * 0.038,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                      return Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 12),
+                                        padding: const EdgeInsets.all(14),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFD7ECE4),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
                                         ),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          Get.defaultDialog(
-                                            title: "Remove Participant",
-                                            middleText: "Are you sure you want to remove ${user.name}?",
-                                            textCancel: "No",
-                                            textConfirm: "Yes",
-                                            confirmTextColor: Colors.white,
-                                            buttonColor: Colors.red,
-                                            cancelTextColor: Colors.grey.shade700,
-                                            onConfirm: () {
-                                              Get.back();
-                                              controller.removeParticipant(user.userId);
-                                            },
-                                          );
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red,
-                                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        child: Row(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: width_size * 0.05,
+                                              backgroundColor:
+                                                  const Color(0xFF114B3A),
+                                              child: const Icon(Icons.person,
+                                                  color: Colors.white,
+                                                  size: 20),
+                                            ),
+                                            const SizedBox(width: 12),
+                                            Expanded(
+                                              child: Text(
+                                                user.name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  fontSize: width_size * 0.038,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Get.defaultDialog(
+                                                  title: "Remove Participant",
+                                                  middleText:
+                                                      "Are you sure you want to remove ${user.name}?",
+                                                  textCancel: "No",
+                                                  textConfirm: "Yes",
+                                                  confirmTextColor:
+                                                      Colors.white,
+                                                  buttonColor: Colors.red,
+                                                  cancelTextColor:
+                                                      Colors.grey.shade700,
+                                                  onConfirm: () {
+                                                    Get.back();
+                                                    controller
+                                                        .removeParticipant(
+                                                            user.userId);
+                                                  },
+                                                );
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.red,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12)),
+                                              ),
+                                              child: const Text("Remove",
+                                                  style: TextStyle(
+                                                      color: Colors.white)),
+                                            ),
+                                          ],
                                         ),
-                                        child: const Text("Remove", style: TextStyle(color: Colors.white)),
-                                      ),
-                                    ],
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ],
                         ),
                       ),
@@ -516,11 +572,11 @@ class ManageEventView extends GetView<ManageEventController> {
   // FUNGSI UNTUK MERENDER TOMBOL TAB (STYLE SEARCH EVENT)
   // =====================================================
   Widget _buildTabButton(
-      String text,
-      IconData icon,
-      int index,
-      TabController tabController,
-      ) {
+    String text,
+    IconData icon,
+    int index,
+    TabController tabController,
+  ) {
     final isSelected = tabController.index == index;
 
     return GestureDetector(
@@ -529,14 +585,10 @@ class ManageEventView extends GetView<ManageEventController> {
         duration: const Duration(milliseconds: 200),
         height: 56,
         decoration: BoxDecoration(
-          color: isSelected
-              ? const Color(0xFFE7F3EF)
-              : Colors.white,
+          color: isSelected ? const Color(0xFFE7F3EF) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? const Color(0xFF0B5D51)
-                : Colors.grey.shade300,
+            color: isSelected ? const Color(0xFF0B5D51) : Colors.grey.shade300,
             width: 1.5,
           ),
         ),
@@ -546,18 +598,15 @@ class ManageEventView extends GetView<ManageEventController> {
             Icon(
               icon,
               size: 20,
-              color: isSelected
-                  ? const Color(0xFF0B5D51)
-                  : Colors.grey.shade700,
+              color:
+                  isSelected ? const Color(0xFF0B5D51) : Colors.grey.shade700,
             ),
             const SizedBox(width: 8),
             Text(
               text,
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: isSelected
-                    ? const Color(0xFF0B5D51)
-                    : Colors.black87,
+                color: isSelected ? const Color(0xFF0B5D51) : Colors.black87,
               ),
             ),
           ],

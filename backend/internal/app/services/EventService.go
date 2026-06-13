@@ -24,6 +24,7 @@ type EventService interface {
 	GetCarouselEvents() (*response.EventCarouselResponseDto, error)
 	GetRecommendedEvents(userID uint) (*response.EventRecommendationResponseDto, error)
 	GetNearbyEvents(
+		userID uint,
 		latitude float64,
 		longitude float64,
 	) ([]response.NearbyEventResponseDto, error)
@@ -51,11 +52,12 @@ type eventService struct {
 }
 
 func (s *eventService) GetNearbyEvents(
+	userID uint,
 	latitude float64,
 	longitude float64,
 ) ([]response.NearbyEventResponseDto, error) {
 
-	events, err := s.eventRepo.GetNearbyEvents()
+	events, err := s.eventRepo.GetNearbyEvents(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +91,11 @@ func (s *eventService) GetNearbyEvents(
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].DistanceKM < result[j].DistanceKM
 	})
+
 	if len(result) > 10 {
 		result = result[:10]
 	}
+
 	return result, nil
 }
 func NewEventService(

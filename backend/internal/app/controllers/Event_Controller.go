@@ -443,6 +443,16 @@ func (c *EventController) GetYourJoinedEvents(ctx *gin.Context) {
 }
 func (c *EventController) GetNearbyEvents(ctx *gin.Context) {
 
+	uid, exists := ctx.Get("user_id")
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error": "unauthorized",
+		})
+		return
+	}
+
+	userID := uid.(uint)
+
 	var req request.NearbyEventRequestDto
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -453,9 +463,11 @@ func (c *EventController) GetNearbyEvents(ctx *gin.Context) {
 	}
 
 	events, err := c.eventService.GetNearbyEvents(
+		userID,
 		req.Latitude,
 		req.Longitude,
 	)
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err.Error(),

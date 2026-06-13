@@ -7,6 +7,7 @@ import '../controllers/profile_controller.dart';
 import '../../../routes/app_pages.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../../../core/api/auth_api.dart';
+import 'dart:io';
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
@@ -20,6 +21,8 @@ class ProfileView extends GetView<ProfileController> {
       body: SafeArea(
         // Obx mendengarkan perubahan status loading & data di controller
         child: Obx(() {
+          bool isLocal = controller.expImagePath.value.isNotEmpty;
+          bool isExisting = controller.existingImageUrl.value.isNotEmpty;
           if (controller.isLoading.value) {
             return const Center(
               child: CircularProgressIndicator(
@@ -581,9 +584,7 @@ class ProfileView extends GetView<ProfileController> {
                               vertical: size.height * 0.016),
                         ),
                         onPressed: () {
-                          controller.showDeleteExperienceDialog(
-                            exp['experience_id'],
-                          );
+                          _showDeleteDialog(context, expId);
                         },
                         child: const Text("Delete",
                             style: TextStyle(color: Colors.red)),
@@ -609,15 +610,7 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                   ],
                 ),
-                SizedBox(height: size.height * 0.015),
-                Text(
-                  description,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
-                    fontSize: size.width * 0.034,
-                    height: 1.5,
-                  ),
-                ),
+                // Kode "SizedBox" dan "Text" deskripsi yang berada di sini sebelumnya telah dihapus.
               ],
             ),
           ),
@@ -755,27 +748,59 @@ class ProfileView extends GetView<ProfileController> {
                 ),
 
                 // Add Image Button (Placeholder)
+
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.upload_file,
-                            size: 18, color: Colors.grey.shade600),
-                        const SizedBox(width: 8),
-                        Text("add image",
-                            style: TextStyle(
-                                color: Colors.grey.shade600, fontSize: 14)),
-                      ],
-                    ),
-                  ),
+                  child: Obx(() {
+                    // Definisi reaktif di dalam Obx
+                    final String imagePath = controller.expImagePath.value;
+                    final String existingUrl =
+                        controller.existingImageUrl.value;
+
+                    // Logika tampil:
+                    // Jika ada file lokal (baru dipilih), pakai file
+                    // Jika tidak, cek apakah ada URL lama (edit mode), pakai network
+                    bool hasImage =
+                        imagePath.isNotEmpty || existingUrl.isNotEmpty;
+
+                    return GestureDetector(
+                      onTap: () => controller.pickExperienceImage(),
+                      child: Container(
+                        width: double.infinity,
+                        height: 180, // Beri tinggi tetap agar preview terlihat
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: hasImage
+                                ? Colors.green.shade600
+                                : Colors.grey.shade300,
+                            width: 2,
+                          ),
+                        ),
+                        child: hasImage
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: imagePath.isNotEmpty
+                                    ? Image.file(File(imagePath),
+                                        fit: BoxFit.cover) // Preview file baru
+                                    : Image.network(existingUrl,
+                                        fit: BoxFit.cover), // Preview foto lama
+                              )
+                            : Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.add_photo_alternate,
+                                      size: 40, color: Colors.grey.shade400),
+                                  const SizedBox(height: 8),
+                                  Text("Add cover image",
+                                      style: TextStyle(
+                                          color: Colors.grey.shade600)),
+                                ],
+                              ),
+                      ),
+                    );
+                  }),
                 ),
 
                 // Description Field
@@ -816,6 +841,101 @@ class ProfileView extends GetView<ProfileController> {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+// =========================================================
+  // SHOW DELETE CONFIRMATION DIALOG
+  // =========================================================
+  void _showDeleteDialog(BuildContext context, int expId) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Ikon Peringatan
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.warning_amber_rounded,
+                    color: Colors.red.shade400, size: 40),
+              ),
+              const SizedBox(height: 24),
+
+              // Judul & Deskripsi
+              const Text(
+                "Delete Experience?",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF114B3A),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Are you sure you want to delete this experience? This action cannot be undone.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              // Tombol Action
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(color: Colors.grey.shade300),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () => Get.back(), // Tutup dialog
+                      child: Text("Cancel",
+                          style: TextStyle(
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade500,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        elevation: 0,
+                      ),
+                      onPressed: () {
+                        Get.back(); // Tutup dialog dulu
+                        // Panggil fungsi hapus dari controller
+                        controller.deleteExperience(expId);
+                      },
+                      child: const Text("Delete",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),

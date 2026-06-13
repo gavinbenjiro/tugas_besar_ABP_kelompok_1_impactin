@@ -14,6 +14,9 @@ class SearchEventView extends GetView<SearchEventController> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final width_size = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       bottomNavigationBar: const CustomBottomNavbar(
@@ -828,9 +831,9 @@ class SearchEventView extends GetView<SearchEventController> {
   // CATEGORY FILTER BOTTOM SHEET
   // ======================================================
   void showCategoryFilter(
-    BuildContext context,
-    SearchEventController controller,
-  ) {
+      BuildContext context,
+      SearchEventController controller,
+      ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
@@ -944,9 +947,9 @@ class SearchEventView extends GetView<SearchEventController> {
   // AGE FILTER BOTTOM SHEET
   // ======================================================
   void showAgeFilter(
-    BuildContext context,
-    SearchEventController controller,
-  ) {
+      BuildContext context,
+      SearchEventController controller,
+      ) {
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(20),
@@ -983,7 +986,7 @@ class SearchEventView extends GetView<SearchEventController> {
             ),
             const SizedBox(height: 20),
             Obx(
-              () => Wrap(
+                  () => Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: controller.ageRanges.map((age) {

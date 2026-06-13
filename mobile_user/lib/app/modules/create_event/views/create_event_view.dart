@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../controllers/create_event_controller.dart';
@@ -19,9 +21,9 @@ class CreateEventView extends GetView<CreateEventController> {
         child: SizedBox(
           height: 55,
           child: Obx(
-            () => ElevatedButton(
+                () => ElevatedButton(
               onPressed:
-                  controller.isLoading.value ? null : controller.createEvent,
+              controller.isLoading.value ? null : controller.createEvent,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF114B3A),
                 shape: RoundedRectangleBorder(
@@ -30,16 +32,16 @@ class CreateEventView extends GetView<CreateEventController> {
               ),
               child: controller.isLoading.value
                   ? const CircularProgressIndicator(
-                      color: Colors.white,
-                    )
+                color: Colors.white,
+              )
                   : const Text(
-                      "Create Event",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
+                "Create Event",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
             ),
           ),
         ),
@@ -140,6 +142,54 @@ class CreateEventView extends GetView<CreateEventController> {
                         SizedBox(
                           height: size.height * .025,
                         ),
+
+                        // ==============================
+                        // COVER IMAGE PICKER
+                        // ==============================
+                        const Text(
+                          "Cover Image",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Obx(() => GestureDetector(
+                          onTap: () => controller.pickCoverImage(),
+                          child: Container(
+                            height: 180,
+                            width: double.infinity,
+                            margin: const EdgeInsets.only(bottom: 18),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: controller.coverImagePath.value.isEmpty
+                                    ? Colors.grey.shade300
+                                    : const Color(0xFF114B3A),
+                                width: 2,
+                              ),
+                            ),
+                            child: controller.coverImagePath.value.isEmpty
+                                ? Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_photo_alternate_outlined, size: 40, color: Colors.grey.shade400),
+                                const SizedBox(height: 8),
+                                Text("Tap to upload cover image", style: TextStyle(color: Colors.grey.shade600)),
+                              ],
+                            )
+                                : ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.file(
+                                File(controller.coverImagePath.value),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                        )),
+                        // ==============================
+
                         _buildField(
                           "Event Title",
                           controller.titleController,
@@ -192,12 +242,8 @@ class CreateEventView extends GetView<CreateEventController> {
                           "Maximum Participant",
                           controller.maxParticipantController,
                           "Set participant limit",
-                          keyboard: TextInputType.number,
-                        ),
-                        _buildField(
-                          "Cover Image URL",
-                          controller.coverImageController,
-                          "https://...",
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Cuma bisa angka
                         ),
                         _buildMultiLine(
                           "Description",
@@ -216,7 +262,8 @@ class CreateEventView extends GetView<CreateEventController> {
                                 "Minimum Age",
                                 controller.minAgeController,
                                 "0",
-                                keyboard: TextInputType.number,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Cuma bisa angka
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -225,7 +272,8 @@ class CreateEventView extends GetView<CreateEventController> {
                                 "Maximum Age",
                                 controller.maxAgeController,
                                 "0",
-                                keyboard: TextInputType.number,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly], // Cuma bisa angka
                               ),
                             ),
                           ],
@@ -247,12 +295,14 @@ class CreateEventView extends GetView<CreateEventController> {
     );
   }
 
+  // Menambahkan parameter opsional inputFormatters ke dalam helper
   Widget _buildField(
-    String title,
-    TextEditingController controller,
-    String hint, {
-    TextInputType? keyboard,
-  }) {
+      String title,
+      TextEditingController controller,
+      String hint, {
+        TextInputType? keyboardType,
+        List<TextInputFormatter>? inputFormatters,
+      }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(
@@ -267,7 +317,8 @@ class CreateEventView extends GetView<CreateEventController> {
           ),
           TextField(
             controller: controller,
-            keyboardType: keyboard,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: hint,
             ),
@@ -278,10 +329,10 @@ class CreateEventView extends GetView<CreateEventController> {
   }
 
   Widget _buildMultiLine(
-    String title,
-    TextEditingController controller,
-    String hint,
-  ) {
+      String title,
+      TextEditingController controller,
+      String hint,
+      ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(
@@ -311,9 +362,9 @@ class CreateEventView extends GetView<CreateEventController> {
   }
 
   Widget _buildDateRow(
-    BuildContext context,
-    CreateEventController controller,
-  ) {
+      BuildContext context,
+      CreateEventController controller,
+      ) {
     return Row(
       children: [
         Expanded(
@@ -348,8 +399,8 @@ class CreateEventView extends GetView<CreateEventController> {
   }
 
   Widget _buildCategoryDropdown(
-    CreateEventController controller,
-  ) {
+      CreateEventController controller,
+      ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: Column(
@@ -364,7 +415,7 @@ class CreateEventView extends GetView<CreateEventController> {
           ),
           const SizedBox(height: 8),
           Obx(
-            () => DropdownButtonFormField<String>(
+                () => DropdownButtonFormField<String>(
               value: controller.selectedCategory.value.isEmpty
                   ? null
                   : controller.selectedCategory.value,
@@ -374,10 +425,10 @@ class CreateEventView extends GetView<CreateEventController> {
               items: controller.categories
                   .map(
                     (category) => DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    ),
-                  )
+                  value: category,
+                  child: Text(category),
+                ),
+              )
                   .toList(),
               onChanged: (value) {
                 if (value != null) {
@@ -392,9 +443,9 @@ class CreateEventView extends GetView<CreateEventController> {
   }
 
   Widget _buildTimeRow(
-    BuildContext context,
-    CreateEventController controller,
-  ) {
+      BuildContext context,
+      CreateEventController controller,
+      ) {
     return Padding(
       padding: const EdgeInsets.only(top: 18),
       child: Row(

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/edit_profile_controller.dart';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../controllers/edit_profile_controller.dart';
 
 class EditProfileView extends GetView<EditProfileController> {
   const EditProfileView({Key? key}) : super(key: key);
@@ -35,37 +39,52 @@ class EditProfileView extends GetView<EditProfileController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- FOTO PROFIL ---
+            // --- FOTO PROFIL ---
             Center(
-              child: Stack(
-                alignment: Alignment.bottomCenter,
-                children: [
-                  Obx(() => CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey.shade200,
-                    // Jika imageUrl dari API berisi data, tampilkan NetworkImage
-                    backgroundImage: controller.imageUrl.value.isNotEmpty &&
-                        controller.imageUrl.value.startsWith('http')
-                        ? NetworkImage(controller.imageUrl.value)
-                        : const AssetImage('assets/images/pp_dum1.jpg') as ImageProvider,
-                  )),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Color(0xFF1A5336),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2),
-                      ),
-                      child: const Icon(
-                        Icons.edit,
-                        color: Colors.white,
-                        size: 16,
+              child: GestureDetector(
+                onTap: () => controller.showImagePicker(context), // Panggil Bottom Sheet
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    Obx(() {
+                      // Logika penentuan gambar
+                      ImageProvider imgProvider;
+                      if (controller.localImagePath.value.isNotEmpty) {
+                        // 1. Jika user baru saja memilih gambar dari HP
+                        imgProvider = FileImage(File(controller.localImagePath.value));
+                      } else if (controller.imageUrl.value.isNotEmpty && controller.imageUrl.value.startsWith('http')) {
+                        // 2. Jika ada gambar dari API
+                        imgProvider = NetworkImage(controller.imageUrl.value);
+                      } else {
+                        // 3. Gambar default bawaan
+                        imgProvider = const AssetImage('assets/images/pp_dum1.jpg');
+                      }
+
+                      return CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: imgProvider,
+                      );
+                    }),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1A5336),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt, // Mengganti ikon edit jadi kamera biar lebih intuitif
+                          color: Colors.white,
+                          size: 16,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 32),
@@ -77,12 +96,10 @@ class EditProfileView extends GetView<EditProfileController> {
             _buildLabel('Full Name'),
             _buildTextField(controller: controller.nameController),
 
-            _buildLabel('Date of Birth'),
+            _buildLabel('Age'),
             _buildTextField(
-              controller: controller.dobController,
-              suffixIcon: const Icon(Icons.calendar_today_outlined, color: Colors.grey, size: 20),
-              readOnly: true,
-              onTap: () => controller.selectDate(context),
+              controller: controller.ageController,
+              keyboardType: TextInputType.number, // Memunculkan keyboard angka
             ),
 
             _buildLabel('Status'),
@@ -207,12 +224,14 @@ class EditProfileView extends GetView<EditProfileController> {
     Widget? suffixIcon,
     bool readOnly = false,
     VoidCallback? onTap,
+    TextInputType? keyboardType,
   }) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
       readOnly: readOnly,
       onTap: onTap,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         filled: true,
         fillColor: const Color(0xFFFAFAFA),

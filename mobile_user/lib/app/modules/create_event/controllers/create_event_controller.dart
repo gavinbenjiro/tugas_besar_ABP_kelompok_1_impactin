@@ -117,8 +117,10 @@ class CreateEventController extends GetxController {
         initialTime: TimeOfDay.now(),
       );
       if (picked != null) {
-        // ignore: use_build_context_synchronously
-        controller.text = picked.format(context);
+        // Force 24-hour format (HH:mm) so it never breaks on AM/PM splits
+        final hour = picked.hour.toString().padLeft(2, '0');
+        final minute = picked.minute.toString().padLeft(2, '0');
+        controller.text = "$hour:$minute";
       }
     } catch (e) {
       _showError("Failed to open time picker.");
@@ -158,28 +160,22 @@ class CreateEventController extends GetxController {
       final endDate = DateTime.parse(endDateController.text);
       final now = DateTime.now();
 
-      final startTimeParts = startTimeController.text.split(RegExp(r'[: ]'));
+      // Easily parse our new strict HH:mm format
+      final startTimeParts = startTimeController.text.split(':');
       int startHour = int.parse(startTimeParts[0]);
       int startMin = int.parse(startTimeParts[1]);
-      if (startTimeController.text.toLowerCase().contains("pm") &&
-          startHour < 12) startHour += 12;
-      if (startTimeController.text.toLowerCase().contains("am") &&
-          startHour == 12) startHour = 0;
 
-      final endTimeParts = endTimeController.text.split(RegExp(r'[: ]'));
+      final endTimeParts = endTimeController.text.split(':');
       int endHour = int.parse(endTimeParts[0]);
       int endMin = int.parse(endTimeParts[1]);
-      if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12)
-        endHour += 12;
-      if (endTimeController.text.toLowerCase().contains("am") && endHour == 12)
-        endHour = 0;
 
       // Validate Time if the event is today
       if (startDate.year == now.year && startDate.month == now.month && startDate.day == now.day) {
         final currentMinutes = now.hour * 60 + now.minute;
         final startMinutes = startHour * 60 + startMin;
+
         if (startMinutes < currentMinutes) {
-          throw "Start time cannot be earlier than the current time.";
+          throw "The start time is in the past! Please advance the time a few minutes.";
         }
       }
 
@@ -187,6 +183,7 @@ class CreateEventController extends GetxController {
       if (startDate.year == endDate.year && startDate.month == endDate.month && startDate.day == endDate.day) {
         final startTotalMinutes = startHour * 60 + startMin;
         final endTotalMinutes = endHour * 60 + endMin;
+
         if (startTotalMinutes >= endTotalMinutes) {
           throw "Start time cannot be equal to or later than end time on the same day.";
         }
@@ -243,8 +240,17 @@ class CreateEventController extends GetxController {
       _showSuccess("Event successfully created!");
 
     } catch (e) {
-      // Any exact error message thrown above gets caught here and shown in the Snackbar
-      _showError(e.toString());
+      String errorMessage = e.toString();
+
+      // Extract the exact error message from the backend if it's a Dio error
+      if (e.runtimeType.toString() == 'DioException') {
+        final dynamic dioError = e;
+        if (dioError.response != null && dioError.response?.data != null) {
+          errorMessage = "Server Error: ${dioError.response?.data}";
+        }
+      }
+
+      _showError(errorMessage);
     } finally {
       isLoading.value = false;
     }
@@ -266,20 +272,7 @@ class CreateEventController extends GetxController {
     minAgeController.dispose();
     maxAgeController.dispose();
     groupLinkController.dispose();
-    titleController.dispose();
-    locationController.dispose();
-    specificAddressController.dispose();
-    addressLinkController.dispose();
-    startDateController.dispose();
-    endDateController.dispose();
-    startTimeController.dispose();
-    endTimeController.dispose();
-    maxParticipantController.dispose();
-    descriptionController.dispose();
-    termsController.dispose();
-    minAgeController.dispose();
-    maxAgeController.dispose();
-    groupLinkController.dispose();
+
     super.onClose();
   }
 }

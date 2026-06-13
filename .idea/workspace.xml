@@ -6,17 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="8de4d51d-9b03-49e8-9947-2cdb190c7d1b" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend-user/src/pages/user/profile.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend-user/src/pages/user/profile.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/android/app/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/android/app/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/core/api/api_client.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/core/api/api_client.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend-admin/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend-admin/package-lock.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/controllers/create_event_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/controllers/create_event_controller.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/views/create_event_view.dart" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/lib/app/modules/create_event/views/create_event_view.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/linux/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/linux/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/linux/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/linux/flutter/generated_plugins.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugin_registrant.cc" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugin_registrant.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugins.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/mobile_user/windows/flutter/generated_plugins.cmake" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

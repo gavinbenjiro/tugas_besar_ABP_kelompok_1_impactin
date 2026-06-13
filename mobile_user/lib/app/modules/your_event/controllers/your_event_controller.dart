@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mobile_user/app/data/models/your_event_model.dart';
 
@@ -22,6 +23,20 @@ class YourEventController extends GetxController {
     getCreatedEvents();
   }
 
+  String _extractErrorMessage(
+    DioException e,
+    String fallback,
+  ) {
+    if (e.response?.data is Map) {
+      return e.response?.data?['message']?.toString() ??
+          e.response?.data?['error']?.toString() ??
+          fallback;
+    } else if (e.response?.data is String) {
+      return e.response!.data;
+    }
+    return fallback;
+  }
+
   Future<void> getJoinedEvents() async {
     try {
       isLoadingJoined.value = true;
@@ -34,7 +49,21 @@ class YourEventController extends GetxController {
 
       joinedEvents.value = data.map((e) => YourEventModel.fromJson(e)).toList();
     } on DioException catch (e) {
-      print(e.response?.data);
+      print("GET JOINED EVENTS ERROR: ${e.response?.data}");
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(e, "Failed to load joined events"),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("GET JOINED EVENTS ERROR: $e");
+      Get.snackbar(
+        "Error",
+        "Something went wrong while loading joined events",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoadingJoined.value = false;
     }
@@ -53,19 +82,41 @@ class YourEventController extends GetxController {
       createdEvents.value =
           data.map((e) => YourEventModel.fromJson(e)).toList();
     } on DioException catch (e) {
-      print(e.response?.data);
+      print("GET CREATED EVENTS ERROR: ${e.response?.data}");
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(e, "Failed to load created events"),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("GET CREATED EVENTS ERROR: $e");
+      Get.snackbar(
+        "Error",
+        "Something went wrong while loading created events",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoadingCreated.value = false;
     }
   }
 
   void changeJoinedStatus(String status) {
-    selectedJoinedStatus.value = status;
-    getJoinedEvents();
+    try {
+      selectedJoinedStatus.value = status;
+      getJoinedEvents();
+    } catch (e) {
+      print("CHANGE JOINED STATUS ERROR: $e");
+    }
   }
 
   void changeCreatedStatus(String status) {
-    selectedCreatedStatus.value = status;
-    getCreatedEvents();
+    try {
+      selectedCreatedStatus.value = status;
+      getCreatedEvents();
+    } catch (e) {
+      print("CHANGE CREATED STATUS ERROR: $e");
+    }
   }
 }

@@ -29,6 +29,7 @@ class CreateEventController extends GetxController {
   // =========================
   // STATE
   // =========================
+
   final selectedCategory = ''.obs;
   final RxnDouble latitude = RxnDouble();
   final RxnDouble longitude = RxnDouble();
@@ -160,14 +161,18 @@ class CreateEventController extends GetxController {
       final startTimeParts = startTimeController.text.split(RegExp(r'[: ]'));
       int startHour = int.parse(startTimeParts[0]);
       int startMin = int.parse(startTimeParts[1]);
-      if (startTimeController.text.toLowerCase().contains("pm") && startHour < 12) startHour += 12;
-      if (startTimeController.text.toLowerCase().contains("am") && startHour == 12) startHour = 0;
+      if (startTimeController.text.toLowerCase().contains("pm") &&
+          startHour < 12) startHour += 12;
+      if (startTimeController.text.toLowerCase().contains("am") &&
+          startHour == 12) startHour = 0;
 
       final endTimeParts = endTimeController.text.split(RegExp(r'[: ]'));
       int endHour = int.parse(endTimeParts[0]);
       int endMin = int.parse(endTimeParts[1]);
-      if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12) endHour += 12;
-      if (endTimeController.text.toLowerCase().contains("am") && endHour == 12) endHour = 0;
+      if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12)
+        endHour += 12;
+      if (endTimeController.text.toLowerCase().contains("am") && endHour == 12)
+        endHour = 0;
 
       // Validate Time if the event is today
       if (startDate.year == now.year && startDate.month == now.month && startDate.day == now.day) {
@@ -247,6 +252,20 @@ class CreateEventController extends GetxController {
 
   @override
   void onClose() {
+    titleController.dispose();
+    locationController.dispose();
+    specificAddressController.dispose();
+    addressLinkController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    maxParticipantController.dispose();
+    descriptionController.dispose();
+    termsController.dispose();
+    minAgeController.dispose();
+    maxAgeController.dispose();
+    groupLinkController.dispose();
     titleController.dispose();
     locationController.dispose();
     specificAddressController.dispose();

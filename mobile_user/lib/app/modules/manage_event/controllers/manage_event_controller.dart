@@ -1,24 +1,36 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import '../../../routes/app_pages.dart';
 
+import '../../../routes/app_pages.dart';
 import '../../../core/api/event_api.dart';
 import '../../../data/models/manage_event_model.dart';
 
 class ManageEventController extends GetxController {
   final isLoading = true.obs;
+  final isActionLoading = false.obs;
 
   final event = Rxn<ManageEventModel>();
 
   late int eventId;
-  final isActionLoading = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+
     print("GET ARGUMENT = ${Get.arguments}");
+
     eventId = Get.arguments;
 
     loadEvent();
+  }
+
+  String _extractErrorMessage(
+    DioException e,
+    String fallback,
+  ) {
+    return e.response?.data?["message"] ??
+        e.response?.data?["error"] ??
+        fallback;
   }
 
   Future<void> loadEvent() async {
@@ -30,6 +42,19 @@ class ManageEventController extends GetxController {
       );
 
       event.value = data;
+    } on DioException catch (e) {
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(
+          e,
+          "Failed to load event",
+        ),
+      );
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        e.toString(),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -49,6 +74,14 @@ class ManageEventController extends GetxController {
       );
 
       await loadEvent();
+    } on DioException catch (e) {
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(
+          e,
+          "Failed to open event",
+        ),
+      );
     } catch (e) {
       Get.snackbar(
         "Error",
@@ -73,6 +106,14 @@ class ManageEventController extends GetxController {
       );
 
       await loadEvent();
+    } on DioException catch (e) {
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(
+          e,
+          "Failed to close event",
+        ),
+      );
     } catch (e) {
       Get.snackbar(
         "Error",
@@ -100,6 +141,15 @@ class ManageEventController extends GetxController {
       Get.offNamed(
         Routes.YOUR_EVENT,
       );
+    } on DioException catch (e) {
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(
+          e,
+          "Failed to cancel event",
+        ),
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       Get.snackbar(
         "Error",
@@ -111,76 +161,92 @@ class ManageEventController extends GetxController {
     }
   }
 
-  Future<void> approveApplicant(
-    int applicantId,
-  ) async {
+  Future<void> approveApplicant(int applicantUserId) async {
     try {
+      isActionLoading.value = true;
+
       await EventApi.updateApplicant(
-        applicantId: applicantId,
-        userId: applicantId,
+        eventId: eventId,
+        userId: applicantUserId,
         action: "approve",
       );
 
       Get.snackbar(
         "Success",
-        "Applicant approved",
+        "Applicant approved successfully",
       );
 
       await loadEvent();
-    } catch (e) {
+    } on DioException catch (e) {
       Get.snackbar(
         "Error",
-        e.toString(),
+        _extractErrorMessage(e, "Failed to approve applicant"),
       );
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
-  Future<void> rejectApplicant(
-    int applicantId,
-  ) async {
+  Future<void> rejectApplicant(int applicantUserId) async {
     try {
+      isActionLoading.value = true;
+
       await EventApi.updateApplicant(
-        applicantId: applicantId,
-        userId: applicantId,
+        eventId: eventId,
+        userId: applicantUserId,
         action: "reject",
       );
 
       Get.snackbar(
         "Success",
-        "Applicant rejected",
+        "Applicant rejected successfully",
       );
 
       await loadEvent();
-    } catch (e) {
+    } on DioException catch (e) {
       Get.snackbar(
         "Error",
-        e.toString(),
+        _extractErrorMessage(e, "Failed to reject applicant"),
       );
+    } catch (e) {
+      Get.snackbar("Error", e.toString());
+    } finally {
+      isActionLoading.value = false;
     }
   }
 
-  Future<void> removeParticipant(
-    int userId,
-  ) async {
+  Future<void> removeParticipant(int userId) async {
     try {
+      isActionLoading.value = true;
+
       await EventApi.removeParticipant(
-        participantId: userId,
+        eventId: eventId,
         userId: userId,
       );
 
       Get.snackbar(
         "Success",
-        "Participant removed",
+        "Participant removed successfully",
         snackPosition: SnackPosition.BOTTOM,
       );
 
       await loadEvent();
+    } on DioException catch (e) {
+      Get.snackbar(
+        "Error",
+        _extractErrorMessage(e, "Failed to remove participant"),
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } catch (e) {
       Get.snackbar(
         "Error",
         e.toString(),
         snackPosition: SnackPosition.BOTTOM,
       );
+    } finally {
+      isActionLoading.value = false;
     }
   }
 }

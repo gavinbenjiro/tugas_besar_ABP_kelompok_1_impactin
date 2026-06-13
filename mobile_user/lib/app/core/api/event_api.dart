@@ -120,12 +120,12 @@ class EventApi {
   }
 
   static Future<Response> updateApplicant({
-    required int applicantId,
+    required int eventId,
     required int userId,
     required String action,
   }) {
     return ApiClient.dio.patch(
-      ApiEndpoints.approveApplicant(applicantId),
+      ApiEndpoints.approveApplicant(eventId), // path uses eventId
       data: {
         "user_id": userId,
         "action": action,
@@ -134,11 +134,11 @@ class EventApi {
   }
 
   static Future<Response> removeParticipant({
-    required int participantId,
+    required int eventId,
     required int userId,
   }) {
     return ApiClient.dio.delete(
-      ApiEndpoints.removeParticipant(participantId),
+      ApiEndpoints.removeParticipant(eventId), // path uses eventId
       data: {
         "user_id": userId,
       },

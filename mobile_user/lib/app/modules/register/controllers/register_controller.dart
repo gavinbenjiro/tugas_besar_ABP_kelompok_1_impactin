@@ -109,7 +109,7 @@ class RegisterController extends GetxController {
         colorText: Colors.white,
       );
 
-      Get.offAllNamed(Routes.LOGIN);
+      Get.offNamed(Routes.LOGIN);
     } on DioException catch (e) {
       print("REGISTER ERROR STATUS: ${e.response?.statusCode}");
       print("REGISTER ERROR BODY: ${e.response?.data}");

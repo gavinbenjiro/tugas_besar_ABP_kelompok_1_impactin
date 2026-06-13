@@ -8,8 +8,10 @@ import 'package:get/get.dart';
 import '../../../routes/app_pages.dart';
 import '../controllers/register_controller.dart';
 
-class RegisterView extends GetView<RegisterController> {
-  const RegisterView({super.key});
+class RegisterView extends StatelessWidget {
+  RegisterView({super.key});
+
+  final RegisterController controller = Get.find<RegisterController>();
 
   @override
   Widget build(BuildContext context) {

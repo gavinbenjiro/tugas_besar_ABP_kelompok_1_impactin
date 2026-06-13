@@ -81,8 +81,10 @@ class YourEventView extends GetView<YourEventController> {
                       // =================================================
                       Positioned(
                         left: size.width * 0.05,
-                        bottom: size.height * 0.025, // Sedikit dinaikkan agar pas
-                        width: size.width * 0.9, // Membatasi lebar agar text bisa wrap
+                        bottom:
+                            size.height * 0.025, // Sedikit dinaikkan agar pas
+                        width: size.width *
+                            0.9, // Membatasi lebar agar text bisa wrap
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -134,24 +136,36 @@ class YourEventView extends GetView<YourEventController> {
                                   Expanded(
                                     child: OutlinedButton(
                                       style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                                        minimumSize: Size(double.infinity, size.height * 0.05),
-                                        backgroundColor: isJoinedTab ? const Color(0xFFE7F3EF) : Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        minimumSize: Size(double.infinity,
+                                            size.height * 0.05),
+                                        backgroundColor: isJoinedTab
+                                            ? const Color(0xFFE7F3EF)
+                                            : Colors.white,
                                         side: BorderSide(
-                                          color: isJoinedTab ? const Color(0xFF0B5D51) : Colors.grey.shade300,
+                                          color: isJoinedTab
+                                              ? const Color(0xFF0B5D51)
+                                              : Colors.grey.shade300,
                                           width: 1.5,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
                                       ),
-                                      onPressed: () => tabController.animateTo(0),
+                                      onPressed: () {
+                                        tabController.animateTo(0);
+                                        controller.changeJoinedStatus('all');
+                                      },
                                       child: Text(
                                         "Joined",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
-                                          color: isJoinedTab ? const Color(0xFF0B5D51) : Colors.grey.shade600,
+                                          color: isJoinedTab
+                                              ? const Color(0xFF0B5D51)
+                                              : Colors.grey.shade600,
                                         ),
                                       ),
                                     ),
@@ -161,24 +175,36 @@ class YourEventView extends GetView<YourEventController> {
                                   Expanded(
                                     child: OutlinedButton(
                                       style: OutlinedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                                        minimumSize: Size(double.infinity, size.height * 0.05),
-                                        backgroundColor: isCreatedTab ? const Color(0xFFE7F3EF) : Colors.white,
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 4),
+                                        minimumSize: Size(double.infinity,
+                                            size.height * 0.05),
+                                        backgroundColor: isCreatedTab
+                                            ? const Color(0xFFE7F3EF)
+                                            : Colors.white,
                                         side: BorderSide(
-                                          color: isCreatedTab ? const Color(0xFF0B5D51) : Colors.grey.shade300,
+                                          color: isCreatedTab
+                                              ? const Color(0xFF0B5D51)
+                                              : Colors.grey.shade300,
                                           width: 1.5,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(14),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                         ),
                                       ),
-                                      onPressed: () => tabController.animateTo(1),
+                                      onPressed: () {
+                                        tabController.animateTo(1);
+                                        controller.changeCreatedStatus('all');
+                                      },
                                       child: Text(
                                         "Created",
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           fontSize: 13,
-                                          color: isCreatedTab ? const Color(0xFF0B5D51) : Colors.grey.shade600,
+                                          color: isCreatedTab
+                                              ? const Color(0xFF0B5D51)
+                                              : Colors.grey.shade600,
                                         ),
                                       ),
                                     ),
@@ -207,8 +233,10 @@ class YourEventView extends GetView<YourEventController> {
 
                                 return OutlinedButton.icon(
                                   style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    minimumSize: Size(double.infinity, size.height * 0.05),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 4),
+                                    minimumSize: Size(
+                                        double.infinity, size.height * 0.05),
                                     backgroundColor: isFiltered
                                         ? const Color(0xFFE7F3EF)
                                         : Colors.white,
@@ -244,7 +272,8 @@ class YourEventView extends GetView<YourEventController> {
                                     ),
                                   ),
                                   onPressed: () {
-                                    _showStatusFilter(context, controller, isJoinedTab);
+                                    _showStatusFilter(
+                                        context, controller, isJoinedTab);
                                   },
                                 );
                               });
@@ -420,10 +449,10 @@ class YourEventView extends GetView<YourEventController> {
   // BOTTOM SHEET SELECTOR (FIXED OVERFLOW & GETX ERROR)
   // =================================================
   void _showStatusFilter(
-      BuildContext context,
-      YourEventController controller,
-      bool isJoinedTab,
-      ) {
+    BuildContext context,
+    YourEventController controller,
+    bool isJoinedTab,
+  ) {
     final List<String> statuses = isJoinedTab
         ? ['all', 'ongoing', 'upcoming', 'completed', 'cancelled']
         : ['all', 'pending', 'approved', 'declined', 'completed', 'cancelled'];
@@ -471,7 +500,8 @@ class YourEventView extends GetView<YourEventController> {
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 12,
                           mainAxisSpacing: 12,
@@ -508,8 +538,9 @@ class YourEventView extends GetView<YourEventController> {
                                   color: isSelected
                                       ? const Color(0xFF0B5D51)
                                       : Colors.grey.shade700,
-                                  fontWeight:
-                                  isSelected ? FontWeight.w700 : FontWeight.w600,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w700
+                                      : FontWeight.w600,
                                   fontSize: 14,
                                 ),
                               ),

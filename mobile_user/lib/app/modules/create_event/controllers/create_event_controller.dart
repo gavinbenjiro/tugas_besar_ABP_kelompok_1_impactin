@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../core/storage/storage_keys.dart';
 import '../../../core/api/event_api.dart';
 import '../../../core/api/cloudinary_api.dart';
 
 class CreateEventController extends GetxController {
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final box = GetStorage();
   final isLoading = false.obs;
 
@@ -29,8 +29,6 @@ class CreateEventController extends GetxController {
   // =========================
   // STATE
   // =========================
-
-
   final selectedCategory = ''.obs;
   final RxnDouble latitude = RxnDouble();
   final RxnDouble longitude = RxnDouble();
@@ -44,6 +42,36 @@ class CreateEventController extends GetxController {
   final ImagePicker _picker = ImagePicker();
   var coverImagePath = "".obs;
 
+  // =========================
+  // SNACKBAR HELPERS
+  // =========================
+  void _showError(String message) {
+    Get.snackbar(
+      "Action Failed",
+      message,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      icon: const Icon(Icons.error_outline, color: Colors.white),
+    );
+  }
+
+  void _showSuccess(String message) {
+    Get.snackbar(
+      "Success",
+      message,
+      backgroundColor: const Color(0xFF114B3A),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+      margin: const EdgeInsets.all(16),
+      icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+    );
+  }
+
+  // =========================
+  // METHODS
+  // =========================
   Future<void> pickCoverImage() async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -54,7 +82,7 @@ class CreateEventController extends GetxController {
         coverImagePath.value = pickedFile.path;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal mengakses galeri', backgroundColor: Colors.red, colorText: Colors.white);
+      _showError("Failed to access gallery: $e");
     }
   }
 
@@ -62,15 +90,19 @@ class CreateEventController extends GetxController {
     required BuildContext context,
     required TextEditingController controller,
   }) async {
-    final DateTime now = DateTime.now();
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: now,
-      firstDate: now,
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+    try {
+      final DateTime now = DateTime.now();
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: now,
+        firstDate: now,
+        lastDate: DateTime(2100),
+      );
+      if (picked != null) {
+        controller.text = "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      }
+    } catch (e) {
+      _showError("Failed to open date picker.");
     }
   }
 
@@ -78,21 +110,48 @@ class CreateEventController extends GetxController {
     required BuildContext context,
     required TextEditingController controller,
   }) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      // ignore: use_build_context_synchronously
-      controller.text = picked.format(context);
+    try {
+      final TimeOfDay? picked = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+      if (picked != null) {
+        // ignore: use_build_context_synchronously
+        controller.text = picked.format(context);
+      }
+    } catch (e) {
+      _showError("Failed to open time picker.");
     }
   }
 
-  bool _validateDateTime() {
-    if (startDateController.text.isEmpty || endDateController.text.isEmpty || startTimeController.text.isEmpty || endTimeController.text.isEmpty) {
-      Get.snackbar("Error", "Tanggal dan waktu harus diisi lengkap", backgroundColor: Colors.red, colorText: Colors.white);
-      return false;
-    }
+  // Sequential Form Validation
+  void _validateAllFields() {
+    if (coverImagePath.value.isEmpty) throw "Please select a cover image for your event.";
+    if (titleController.text.trim().isEmpty) throw "Please add the title of this event.";
+    if (selectedCategory.value.isEmpty) throw "Please select an event category.";
+    if (locationController.text.trim().isEmpty) throw "Please enter the location (City, Country).";
+    if (specificAddressController.text.trim().isEmpty) throw "Please enter the specific address.";
+    if (latitude.value == null || longitude.value == null) throw "Please pin the specific location on the map.";
+    if (addressLinkController.text.trim().isEmpty) throw "Please provide an address link.";
+    if (startDateController.text.trim().isEmpty) throw "Please select a start date.";
+    if (endDateController.text.trim().isEmpty) throw "Please select an end date.";
+    if (startTimeController.text.trim().isEmpty) throw "Please select a start time.";
+    if (endTimeController.text.trim().isEmpty) throw "Please select an end time.";
+    if (maxParticipantController.text.trim().isEmpty) throw "Please set the maximum number of participants.";
+    if (descriptionController.text.trim().isEmpty) throw "Please provide a description for your event.";
+    if (termsController.text.trim().isEmpty) throw "Please add terms & conditions for your event.";
+    if (minAgeController.text.trim().isEmpty) throw "Please specify a minimum age.";
+    if (maxAgeController.text.trim().isEmpty) throw "Please specify a maximum age.";
+
+    // Custom logic check for Age
+    int minAge = int.tryParse(minAgeController.text.trim()) ?? 0;
+    int maxAge = int.tryParse(maxAgeController.text.trim()) ?? 0;
+    if (maxAge < minAge) throw "Maximum age cannot be less than minimum age.";
+
+    if (groupLinkController.text.trim().isEmpty) throw "Please provide a group chat link.";
+  }
+
+  void _validateDateTimeLogic() {
     try {
       final startDate = DateTime.parse(startDateController.text);
       final endDate = DateTime.parse(endDateController.text);
@@ -110,54 +169,46 @@ class CreateEventController extends GetxController {
       if (endTimeController.text.toLowerCase().contains("pm") && endHour < 12) endHour += 12;
       if (endTimeController.text.toLowerCase().contains("am") && endHour == 12) endHour = 0;
 
+      // Validate Time if the event is today
       if (startDate.year == now.year && startDate.month == now.month && startDate.day == now.day) {
         final currentMinutes = now.hour * 60 + now.minute;
         final startMinutes = startHour * 60 + startMin;
         if (startMinutes < currentMinutes) {
-          Get.snackbar("Waktu Tidak Valid", "Waktu mulai tidak boleh kurang dari jam saat ini.", backgroundColor: Colors.red, colorText: Colors.white);
-          return false;
+          throw "Start time cannot be earlier than the current time.";
         }
       }
 
+      // Validate End Time vs Start Time if on the same day
       if (startDate.year == endDate.year && startDate.month == endDate.month && startDate.day == endDate.day) {
         final startTotalMinutes = startHour * 60 + startMin;
         final endTotalMinutes = endHour * 60 + endMin;
         if (startTotalMinutes >= endTotalMinutes) {
-          Get.defaultDialog(
-            title: "Peringatan Waktu",
-            titleStyle: const TextStyle(fontWeight: FontWeight.bold),
-            middleText: "Waktu mulai tidak boleh sama dengan atau lebih besar dari waktu selesai di hari yang sama.",
-            textConfirm: "Oke, Paham",
-            confirmTextColor: Colors.white,
-            buttonColor: const Color(0xFF0B5D51),
-            onConfirm: () => Get.back(),
-          );
-          return false;
+          throw "Start time cannot be equal to or later than end time on the same day.";
         }
       }
-      return true;
     } catch (e) {
-      Get.snackbar("Error", "Format waktu/tanggal salah", backgroundColor: Colors.red, colorText: Colors.white);
-      return false;
+      if (e is String) rethrow;
+      throw "Invalid date or time format. Please re-select.";
     }
   }
 
   Future<void> createEvent() async {
-    if (!_validateDateTime()) return;
-    if (coverImagePath.value.isEmpty) {
-      Get.snackbar('Error', 'Silakan pilih cover image terlebih dahulu', backgroundColor: Colors.red, colorText: Colors.white);
-      return;
-    }
-
     try {
       isLoading.value = true;
+
+      // 1. Validate all fields sequentially (throws exact errors)
+      _validateAllFields();
+
+      // 2. Validate deeper DateTime logic
+      _validateDateTimeLogic();
+
+      // 3. Upload Image
       String? imageUrlFromCloudinary = await CloudinaryApi.uploadImage(coverImagePath.value);
       if (imageUrlFromCloudinary == null) {
-        Get.snackbar('Gagal', 'Upload gambar ke server gagal', backgroundColor: Colors.red, colorText: Colors.white);
-        isLoading.value = false;
-        return;
+        throw "Failed to upload image to the server.";
       }
 
+      // 4. Prepare Payload
       final body = {
         "title": titleController.text.trim(),
         "category": selectedCategory.value,
@@ -179,12 +230,16 @@ class CreateEventController extends GetxController {
         "longitude": longitude.value,
       };
 
+      // 5. API Request
       await EventApi.createEvent(body: body);
 
+      // 6. Success Handling
       Get.back();
-      Get.snackbar("Success", "Event successfully created", backgroundColor: Colors.green, colorText: Colors.white);
+      _showSuccess("Event successfully created!");
+
     } catch (e) {
-      Get.snackbar("Error", "Gagal membuat event: $e", backgroundColor: Colors.red, colorText: Colors.white);
+      // Any exact error message thrown above gets caught here and shown in the Snackbar
+      _showError(e.toString());
     } finally {
       isLoading.value = false;
     }
@@ -192,10 +247,20 @@ class CreateEventController extends GetxController {
 
   @override
   void onClose() {
-    titleController.dispose(); locationController.dispose(); specificAddressController.dispose(); addressLinkController.dispose();
-    startDateController.dispose(); endDateController.dispose(); startTimeController.dispose(); endTimeController.dispose();
-    maxParticipantController.dispose(); descriptionController.dispose(); termsController.dispose(); minAgeController.dispose();
-    maxAgeController.dispose(); groupLinkController.dispose();
+    titleController.dispose();
+    locationController.dispose();
+    specificAddressController.dispose();
+    addressLinkController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
+    startTimeController.dispose();
+    endTimeController.dispose();
+    maxParticipantController.dispose();
+    descriptionController.dispose();
+    termsController.dispose();
+    minAgeController.dispose();
+    maxAgeController.dispose();
+    groupLinkController.dispose();
     super.onClose();
   }
 }

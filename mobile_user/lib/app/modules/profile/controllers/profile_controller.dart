@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:dio/dio.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_user/app/core/api/auth_api.dart';
+import 'package:mobile_user/app/routes/app_pages.dart';
 import '../../../core/storage/storage_keys.dart';
 import '../../../core/api/profile_api.dart';
 import 'package:image_picker/image_picker.dart';
@@ -51,6 +54,20 @@ class ProfileController extends GetxController {
     fetchProfileData();
   }
 
+  String _extractErrorMessage(
+    DioException e,
+    String fallback,
+  ) {
+    if (e.response?.data is Map) {
+      return e.response?.data?['message']?.toString() ??
+          e.response?.data?['error']?.toString() ??
+          fallback;
+    } else if (e.response?.data is String) {
+      return e.response!.data;
+    }
+    return fallback;
+  }
+
   // ==========================================
   // IMAGE PICKER
   // ==========================================
@@ -64,7 +81,12 @@ class ProfileController extends GetxController {
       if (pickedFile != null) {
         expImagePath.value = pickedFile.path;
       }
+    } on PlatformException catch (e) {
+      print("PICK IMAGE PLATFORM ERROR: ${e.message}");
+      Get.snackbar('Error', 'Tidak dapat mengakses galeri',
+          backgroundColor: Colors.red, colorText: Colors.white);
     } catch (e) {
+      print("PICK IMAGE ERROR: $e");
       Get.snackbar('Error', 'Gagal mengakses galeri',
           backgroundColor: Colors.red, colorText: Colors.white);
     }
@@ -116,10 +138,21 @@ class ProfileController extends GetxController {
         isYou.value = data['is_you'] ?? true;
       }
     } on DioException catch (e) {
-      Get.snackbar('Gagal Memuat Profil', 'Gagal menarik data dari server',
-          backgroundColor: Colors.orange, colorText: Colors.white);
+      print("FETCH PROFILE ERROR: ${e.response?.data}");
+      Get.snackbar(
+        'Gagal Memuat Profil',
+        _extractErrorMessage(e, 'Gagal menarik data dari server'),
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print("ERROR FETCHING PROFILE: $e");
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan saat memuat profil',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -130,32 +163,39 @@ class ProfileController extends GetxController {
   // ==========================================
   var existingImageUrl = "".obs;
   void openExperienceForm({Map<String, dynamic>? exp}) {
-    expImagePath.value = "";
+    try {
+      expImagePath.value = "";
 
-    if (exp != null) {
-      // Mode Edit
-      existingImageUrl.value = exp['cover_image'] ?? "";
-      expTitleController.text = exp['title'] ?? '';
+      if (exp != null) {
+        // Mode Edit
+        existingImageUrl.value = exp['cover_image'] ?? "";
+        expTitleController.text = exp['title'] ?? '';
 
-      // --- PERBAIKAN DI SINI ---
-      // Kita cek 'host_name' dulu, jika null, ambil 'creator'
-      expHostController.text = exp['host_name'] ?? exp['creator'] ?? '';
+        // --- PERBAIKAN DI SINI ---
+        // Kita cek 'host_name' dulu, jika null, ambil 'creator'
+        expHostController.text = exp['host_name'] ?? exp['creator'] ?? '';
 
-      expDescController.text = exp['description'] ?? '';
+        expDescController.text = exp['description'] ?? '';
 
-      // Sanitasi tanggal
-      String rawDate = exp['date']?.toString() ?? '';
-      if (rawDate.contains('T')) {
-        expDateController.text = rawDate.split('T')[0];
+        // Sanitasi tanggal
+        String rawDate = exp['date']?.toString() ?? '';
+        if (rawDate.contains('T')) {
+          expDateController.text = rawDate.split('T')[0];
+        } else {
+          expDateController.text = rawDate;
+          existingImageUrl.value = "";
+        }
       } else {
-        expDateController.text = rawDate;
+        expTitleController.clear();
+        expHostController.clear();
+        expDescController.clear();
+        expDateController.clear();
         existingImageUrl.value = "";
       }
-    } else {
-      expTitleController.clear();
-      expHostController.clear();
-      expDescController.clear();
-      expDateController.clear();
+    } catch (e) {
+      print("OPEN EXPERIENCE FORM ERROR: $e");
+      Get.snackbar('Error', 'Gagal membuka form experience',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -163,23 +203,29 @@ class ProfileController extends GetxController {
   // LOGIC: SELECT DATE FOR EXPERIENCE
   // ==========================================
   Future<void> selectExpDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1950),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF114B3A)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked != null) {
-      expDateController.text =
-          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+    try {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(1950),
+        lastDate: DateTime.now(),
+        builder: (context, child) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: const ColorScheme.light(primary: Color(0xFF114B3A)),
+            ),
+            child: child!,
+          );
+        },
+      );
+      if (picked != null) {
+        expDateController.text =
+            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+      }
+    } catch (e) {
+      print("SELECT DATE ERROR: $e");
+      Get.snackbar('Error', 'Gagal memilih tanggal',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
@@ -190,19 +236,52 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
-      if (token == null) return;
+
+      if (token == null) {
+        Get.snackbar('Error', 'Sesi tidak valid. Silakan login kembali.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
+      // Basic validation
+      if (expTitleController.text.trim().isEmpty) {
+        Get.snackbar('Error', 'Judul experience tidak boleh kosong',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
+      if (expDateController.text.trim().isEmpty) {
+        Get.snackbar('Error', 'Tanggal tidak boleh kosong',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
 
       // 1. Tentukan gambar mana yang akan dikirim
       String? imageUrlToSend;
 
       if (expImagePath.value.isNotEmpty) {
         // Jika ada file baru, upload ke Cloudinary
-        imageUrlToSend = await CloudinaryApi.uploadImage(expImagePath.value);
+        try {
+          imageUrlToSend = await CloudinaryApi.uploadImage(expImagePath.value);
 
-        if (imageUrlToSend == null) {
-          Get.snackbar('Gagal', 'Upload gambar gagal',
-              backgroundColor: Colors.red);
-          isLoading.value = false;
+          if (imageUrlToSend == null) {
+            Get.snackbar('Gagal', 'Upload gambar gagal',
+                backgroundColor: Colors.red, colorText: Colors.white);
+            return;
+          }
+        } on DioException catch (e) {
+          print("UPLOAD EXPERIENCE IMAGE ERROR: ${e.response?.data}");
+          Get.snackbar(
+            'Gagal',
+            'Gagal mengunggah gambar: ${_extractErrorMessage(e, "kesalahan jaringan")}',
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+          return;
+        } catch (e) {
+          print("UPLOAD EXPERIENCE IMAGE ERROR: $e");
+          Get.snackbar('Gagal', 'Gagal mengunggah gambar',
+              backgroundColor: Colors.red, colorText: Colors.white);
           return;
         }
       } else {
@@ -234,14 +313,22 @@ class ProfileController extends GetxController {
             id: id, data: requestBody, token: token);
       }
 
-      fetchProfileData();
+      await fetchProfileData();
       Get.back();
       Get.snackbar('Sukses', 'Experience berhasil disimpan',
-          backgroundColor: Colors.green);
+          backgroundColor: Colors.green, colorText: Colors.white);
+    } on DioException catch (e) {
+      print("SAVE EXPERIENCE ERROR: ${e.response?.data}");
+      Get.snackbar(
+        'Gagal',
+        _extractErrorMessage(e, 'Gagal menyimpan experience'),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } catch (e) {
       print("ERROR DETAIL: $e");
-      Get.snackbar('Gagal', 'Periksa terminal untuk detail error',
-          backgroundColor: Colors.red);
+      Get.snackbar('Gagal', 'Terjadi kesalahan saat menyimpan experience',
+          backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
     }
@@ -255,6 +342,12 @@ class ProfileController extends GetxController {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
 
+      if (token == null) {
+        Get.snackbar('Error', 'Sesi tidak valid. Silakan login kembali.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
+
       await ProfileApi.deleteExperience(id: id, token: token);
 
       await fetchProfileData();
@@ -262,7 +355,16 @@ class ProfileController extends GetxController {
       Get.snackbar('Sukses', 'Experience berhasil dihapus',
           backgroundColor: Colors.green, colorText: Colors.white);
     } on DioException catch (e) {
-      Get.snackbar('Gagal', 'Gagal menghapus experience',
+      print("DELETE EXPERIENCE ERROR: ${e.response?.data}");
+      Get.snackbar(
+        'Gagal',
+        _extractErrorMessage(e, 'Gagal menghapus experience'),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("DELETE EXPERIENCE ERROR: $e");
+      Get.snackbar('Gagal', 'Terjadi kesalahan saat menghapus experience',
           backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
@@ -273,6 +375,14 @@ class ProfileController extends GetxController {
   // LOGIC: UPDATE PASSWORD
   // ==========================================
   Future<void> updatePassword() async {
+    if (oldPassController.text.trim().isEmpty ||
+        newPassController.text.trim().isEmpty ||
+        confirmPassController.text.trim().isEmpty) {
+      Get.snackbar('Error', 'Semua field password harus diisi',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return;
+    }
+
     if (newPassController.text != confirmPassController.text) {
       Get.snackbar('Error', 'Password baru dan konfirmasi tidak sama',
           backgroundColor: Colors.red, colorText: Colors.white);
@@ -282,6 +392,12 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       final token = box.read(StorageKeys.token);
+
+      if (token == null) {
+        Get.snackbar('Error', 'Sesi tidak valid. Silakan login kembali.',
+            backgroundColor: Colors.orange, colorText: Colors.white);
+        return;
+      }
 
       await ProfileApi.updatePassword(
         data: {
@@ -299,17 +415,37 @@ class ProfileController extends GetxController {
       newPassController.clear();
       confirmPassController.clear();
     } on DioException catch (e) {
-      String errorMessage = 'Gagal mengubah password';
-      if (e.response?.data != null && e.response!.data is Map) {
-        errorMessage = e.response!.data['message'] ?? errorMessage;
-      } else if (e.response?.data is String) {
-        errorMessage = e.response!.data;
-      }
-
-      Get.snackbar('Gagal', errorMessage,
+      print("UPDATE PASSWORD ERROR: ${e.response?.data}");
+      Get.snackbar(
+        'Gagal',
+        _extractErrorMessage(e, 'Gagal mengubah password'),
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      print("UPDATE PASSWORD ERROR: $e");
+      Get.snackbar('Gagal', 'Terjadi kesalahan saat mengubah password',
           backgroundColor: Colors.red, colorText: Colors.white);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await AuthApi.logout(fcmToken);
+      }
+    } catch (e) {
+      print("LOGOUT ERROR: $e");
+    } finally {
+      box.remove(StorageKeys.token);
+      box.remove(StorageKeys.userId);
+      box.remove(StorageKeys.username);
+      box.remove(StorageKeys.email);
+
+      Get.offAllNamed(Routes.LOGIN);
     }
   }
 

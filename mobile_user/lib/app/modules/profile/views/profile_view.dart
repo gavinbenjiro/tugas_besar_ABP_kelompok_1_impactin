@@ -350,36 +350,114 @@ class ProfileView extends GetView<ProfileController> {
                                   borderRadius: BorderRadius.circular(18),
                                 ),
                               ),
-                              onPressed: () async {
-                                try {
-                                  final fcmToken = await FirebaseMessaging
-                                      .instance
-                                      .getToken();
-
-                                  if (fcmToken != null) {
-                                    await AuthApi.logout(fcmToken);
-                                  }
-
-                                  final box = GetStorage();
-
-                                  box.remove(StorageKeys.token);
-                                  box.remove(StorageKeys.userId);
-                                  box.remove(StorageKeys.username);
-                                  box.remove(StorageKeys.email);
-
-                                  Get.offAllNamed(Routes.LOGIN);
-                                } catch (e) {
-                                  print("LOGOUT ERROR: $e");
-
-                                  final box = GetStorage();
-
-                                  box.remove(StorageKeys.token);
-                                  box.remove(StorageKeys.userId);
-                                  box.remove(StorageKeys.username);
-                                  box.remove(StorageKeys.email);
-
-                                  Get.offAllNamed(Routes.LOGIN);
-                                }
+                              onPressed: () {
+                                Get.dialog(
+                                  Dialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(16)),
+                                    backgroundColor: Colors.white,
+                                    insetPadding: const EdgeInsets.symmetric(
+                                        horizontal: 24),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(24.0),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Container(
+                                            padding: const EdgeInsets.all(16),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red.shade50,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(Icons.logout,
+                                                color: Colors.red.shade400,
+                                                size: 40),
+                                          ),
+                                          const SizedBox(height: 24),
+                                          const Text(
+                                            "Logout?",
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.w800,
+                                              color: Color(0xFF114B3A),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          Text(
+                                            "Are you sure you want to log out of your account?",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey.shade600,
+                                              height: 1.5,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 32),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: OutlinedButton(
+                                                  style:
+                                                      OutlinedButton.styleFrom(
+                                                    side: BorderSide(
+                                                        color: Colors
+                                                            .grey.shade300),
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12)),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 14),
+                                                  ),
+                                                  onPressed: () => Get.back(),
+                                                  child: Text("Cancel",
+                                                      style: TextStyle(
+                                                          color: Colors
+                                                              .grey.shade700,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: ElevatedButton(
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    backgroundColor:
+                                                        Colors.red.shade500,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        12)),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        vertical: 14),
+                                                    elevation: 0,
+                                                  ),
+                                                  onPressed: () {
+                                                    Get.back();
+                                                    controller.logout();
+                                                  },
+                                                  child: const Text("Logout",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                );
                               },
                               icon: Icon(
                                 Icons.logout,
